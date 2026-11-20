@@ -1,0 +1,90 @@
+{% extends 'studenthq/base.html' %}
+{% block title %}My Profile - Student HQ | AUN{% endblock %}
+{% block extra_css %}
+<style>
+    .page-header { background: linear-gradient(135deg, #001f3f 0%, #003d6b 100%); color: white; padding: 2.5rem 0; margin-bottom: 2rem; }
+    .page-header h1 { font-weight: 700; margin: 0; }
+    .form-card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 2rem; }
+    .form-card h5 { font-weight: 700; color: #001f3f; margin-bottom: 1.5rem; border-bottom: 2px solid #e0e0e0; padding-bottom: 0.75rem; }
+    .form-label { font-weight: 600; color: #001f3f; margin-bottom: 0.5rem; }
+    .form-control, .form-select { border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 0.75rem 1rem; }
+    .form-control:focus, .form-select:focus { border-color: #001f3f; box-shadow: 0 0 0 0.2rem rgba(0,31,63,0.15); }
+    .form-control:disabled { background-color: #f5f5f5; color: #6c757d; }
+    .btn-save { background-color: #001f3f; border-color: #001f3f; color: white; font-weight: 600; padding: 0.75rem 2rem; border-radius: 8px; }
+    .btn-save:hover { background-color: #003d6b; color: white; }
+    .info-note { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; font-size: 0.9rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container-fluid px-4">
+        <h1>My Profile</h1>
+        <p class="mb-0 mt-1" style="opacity:0.9;">Manage your account details</p>
+    </div>
+</div>
+<div class="container-fluid px-4 mb-5">
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="form-card">
+                <h5>Personal Information</h5>
+                <div class="info-note">
+                    Your Student ID and email cannot be changed here. Contact the Registry office for corrections.
+                </div>
+                <form method="POST" action="{% url 'profile' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ user.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Student ID</label>
+                        <input type="text" class="form-control" value="{{ student.studentID }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">University Email</label>
+                        <input type="email" class="form-control" value="{{ user.email }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Program</label>
+                        <select name="program" class="form-select" required>
+                            <option value="Computer Science" {% if student.program == 'Computer Science' %}selected{% endif %}>Computer Science</option>
+                            <option value="Business Administration" {% if student.program == 'Business Administration' %}selected{% endif %}>Business Administration</option>
+                            <option value="Economics" {% if student.program == 'Economics' %}selected{% endif %}>Economics</option>
+                            <option value="Engineering" {% if student.program == 'Engineering' %}selected{% endif %}>Engineering</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Year Level</label>
+                        <select name="year_level" class="form-select" required>
+                            <option value="1" {% if student.yearLevel == 1 %}selected{% endif %}>Year 1</option>
+                            <option value="2" {% if student.yearLevel == 2 %}selected{% endif %}>Year 2</option>
+                            <option value="3" {% if student.yearLevel == 3 %}selected{% endif %}>Year 3</option>
+                            <option value="4" {% if student.yearLevel == 4 %}selected{% endif %}>Year 4</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-save">Save Changes</button>
+                </form>
+            </div>
+            <div class="form-card">
+                <h5>Change Password</h5>
+                <form method="POST" action="{% url 'change_password' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="current_password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="new_password1" class="form-control" placeholder="Minimum 8 characters" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" name="new_password2" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-save">Update Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

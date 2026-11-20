@@ -1,0 +1,99 @@
+{% extends 'studenthq/base.html' %}
+{% block title %}Payment Penalty Simulator - Student HQ | AUN{% endblock %}
+{% block nav_penalty %}active{% endblock %}
+{% block extra_css %}
+<style>
+    .page-header { background: linear-gradient(135deg, #001a4d 0%, #003d99 100%); color: white; padding: 2.5rem 0; margin-bottom: 2.5rem; }
+    .page-header h1 { font-weight: 700; font-size: 2.5rem; margin: 0; }
+    .form-card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 2.5rem; }
+    .form-card h5 { color: #001a4d; font-weight: 700; margin-bottom: 1.5rem; }
+    .form-label { font-weight: 600; color: #001a4d; margin-bottom: 0.75rem; font-size: 1rem; }
+    .btn-calculate { background-color: #003d99; border: none; color: white; font-weight: 600; padding: 0.75rem 2.5rem; border-radius: 8px; font-size: 1rem; width: 100%; }
+    .btn-calculate:hover { background-color: #001a4d; color: white; }
+    .summary-card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 2.5rem; border-left: 5px solid #003d99; }
+    .summary-card h5 { color: #001a4d; font-weight: 700; margin-bottom: 1.5rem; }
+    .summary-item { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0; border-bottom: 1px solid #e0e0e0; }
+    .summary-item:last-child { border-bottom: none; }
+    .summary-label { font-weight: 600; color: #555; font-size: 1rem; }
+    .summary-value { font-size: 1.75rem; font-weight: 700; color: #001a4d; }
+    .summary-value.penalty { color: #d63031; }
+    .summary-value.total { color: #27ae60; }
+    .comparison-table { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .comparison-table h5 { color: #001a4d; font-weight: 700; margin-bottom: 1.5rem; }
+    .table thead { background-color: #001a4d; color: white; }
+    .table th { border: none; padding: 1rem; font-weight: 600; text-align: center; }
+    .table td { padding: 1rem; text-align: center; border-bottom: 1px solid #e0e0e0; font-weight: 500; }
+    .table .scenario-name { text-align: left; font-weight: 600; color: #001a4d; }
+    .table .penalty-amount { color: #d63031; font-weight: 700; }
+    .table .total-amount { color: #27ae60; font-weight: 700; }
+    .warning-alert { background-color: #fff3cd; border: 2px solid #ff6b6b; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: none; color: #d63031; font-weight: 500; }
+    .warning-alert.show { display: flex; align-items: center; gap: 0.5rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container-fluid px-4">
+        <h1>Payment Penalty Simulator</h1>
+        <p style="margin-top:0.5rem; opacity:0.9; font-size:1.1rem;">Calculate potential penalties for late payments and plan your finances accordingly</p>
+    </div>
+</div>
+<main class="container-fluid px-4 mb-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="form-card">
+                <h5>Payment Details</h5>
+                <form method="POST" action="{% url 'payment_simulator' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Current Amount Due (₦)</label>
+                        <input type="number" class="form-control" name="amount_due" placeholder="e.g., 500000" min="0" step="1000" value="{{ form_data.amount_due|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Due Date</label>
+                        <input type="date" class="form-control" name="due_date" value="{{ form_data.due_date|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Planned Payment Date</label>
+                        <input type="date" class="form-control" name="planned_date" value="{{ form_data.planned_date|default:'' }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-calculate">Calculate Penalty</button>
+                </form>
+            </div>
+            {% if result %}
+            {% if result.months_overdue > 0 %}
+            <div class="warning-alert show">
+                <strong>⚠ Warning:</strong> Planned payment date is after the due date. A penalty of ₦30,000 per month will apply.
+            </div>
+            {% endif %}
+            <div class="summary-card">
+                <h5>Penalty Calculation Summary</h5>
+                <div class="summary-item">
+                    <span class="summary-label">Number of Months Overdue</span>
+                    <span class="summary-value">{{ result.months_overdue }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Penalty Amount (₦30,000 × {{ result.months_overdue }} months)</span>
+                    <span class="summary-value penalty">₦{{ result.penalty|floatformat:0 }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Total Amount If Paid on Planned Date</span>
+                    <span class="summary-value total">₦{{ result.total|floatformat:0 }}</span>
+                </div>
+            </div>
+            <div class="comparison-table">
+                <h5>Payment Timeline Comparison</h5>
+                <table class="table">
+                    <thead><tr><th>Payment Scenario</th><th>Penalty</th><th>Total Amount</th></tr></thead>
+                    <tbody>
+                        <tr><td class="scenario-name">Pay On Time</td><td class="penalty-amount">₦0</td><td class="total-amount">₦{{ result.amount_due|floatformat:0 }}</td></tr>
+                        <tr><td class="scenario-name">Pay 1 Month Late</td><td class="penalty-amount">₦30,000</td><td class="total-amount">₦{{ result.scenario_1|floatformat:0 }}</td></tr>
+                        <tr><td class="scenario-name">Pay 2 Months Late</td><td class="penalty-amount">₦60,000</td><td class="total-amount">₦{{ result.scenario_2|floatformat:0 }}</td></tr>
+                        <tr><td class="scenario-name">Pay 3 Months Late</td><td class="penalty-amount">₦90,000</td><td class="total-amount">₦{{ result.scenario_3|floatformat:0 }}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}

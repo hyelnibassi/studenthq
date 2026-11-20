@@ -1,0 +1,193 @@
+{% extends 'studenthq/base.html' %}
+{% block title %}Course Catalog - Student HQ | AUN{% endblock %}
+{% block nav_catalog %}active{% endblock %}
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #0ea5e9 100%);
+        color: white;
+        padding: 2.5rem 0;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(79, 70, 229, 0.22);
+    }
+    .page-header h1 { font-weight: 800; font-size: 2.3rem; margin-bottom: 0.4rem; }
+    .filter-section {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+    .filter-section label { font-weight: 700; color: #312e81; font-size: 0.86rem; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.4px; }
+    .table-container { border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07); margin-bottom: 2rem; background: white; border: 1px solid #e2e8f0; }
+    .table thead { background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 100%); color: white; }
+    .table thead th { font-weight: 700; padding: 1rem 0.85rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.4px; border: none; }
+    .table tbody td { padding: 0.9rem 0.85rem; vertical-align: middle; font-size: 0.93rem; }
+    .table tbody tr:hover { background-color: #f5f3ff; }
+    .course-code { font-weight: 800; color: #4f46e5; white-space: nowrap; }
+    .course-credits { background-color: #dbeafe; color: #1d4ed8; padding: 0.3rem 0.65rem; border-radius: 999px; font-weight: 700; font-size: 0.82rem; }
+    .school-badge { display: inline-block; padding: 0.28rem 0.65rem; border-radius: 999px; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.4px; }
+    .school-SAS { background-color: #f3e8ff; color: #7e22ce; }
+    .school-SITC { background-color: #dbeafe; color: #1d4ed8; }
+    .school-SOE { background-color: #cffafe; color: #0e7490; }
+    .school-SBE { background-color: #fef3c7; color: #b45309; }
+    .school-GENED { background-color: #d1fae5; color: #047857; }
+    .school-default { background-color: #e2e8f0; color: #475569; }
+    .dept-badge { background-color: #f1f5f9; color: #1e293b; padding: 0.3rem 0.65rem; border-radius: 8px; font-size: 0.84rem; font-weight: 600; display: inline-block; }
+    .btn-view { background: linear-gradient(135deg, #4f46e5, #0ea5e9); color: white; border: none; padding: 0.42rem 0.95rem; border-radius: 999px; font-size: 0.83rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: opacity 0.2s ease; }
+    .btn-view:hover { opacity: 0.9; }
+    .details-row { display: none; }
+    .details-row.show { display: table-row; }
+    .details-cell { padding: 1.25rem 1.5rem; background: linear-gradient(135deg, #f8faff 0%, #fdf4ff 100%); border-top: 2px solid #7c3aed; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container-fluid px-4">
+        <h1>Course Catalog</h1>
+        <div style="color:rgba(255,255,255,0.85);">AUN 2022–2025 Academic Catalog (SAS, SITC, SOE &amp; General Education)</div>
+    </div>
+</div>
+<main class="container-fluid px-4">
+    <form method="GET" action="{% url 'course_catalog' %}">
+        <div class="filter-section">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-2">
+                    <label>School</label>
+                    <select name="school" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Schools</option>
+                        {% for code, label in schools %}
+                        <option value="{{ code }}" {% if request.GET.school == code %}selected{% endif %}>{{ code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label>Department</label>
+                    <select name="department" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Departments</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept }}" {% if request.GET.department == dept %}selected{% endif %}>{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-2">
+                    <label>Semester</label>
+                    <select name="semester" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Semesters</option>
+                        <option value="Fall" {% if request.GET.semester == 'Fall' %}selected{% endif %}>Fall</option>
+                        <option value="Spring" {% if request.GET.semester == 'Spring' %}selected{% endif %}>Spring</option>
+                        <option value="Summer" {% if request.GET.semester == 'Summer' %}selected{% endif %}>Summer</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label>Search Course</label>
+                    <input type="text" name="search" class="form-control" placeholder="e.g., CSC202, Algorithms, EEE..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-12 col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                    <a href="{% url 'course_catalog' %}" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="text-muted small">
+            Showing <strong>{{ courses.start_index|default:0 }}–{{ courses.end_index|default:0 }}</strong> of <strong>{{ total_courses }}</strong> courses
+        </div>
+        <div class="text-muted small">
+            Page <strong>{{ courses.number }}</strong> of <strong>{{ courses.paginator.num_pages }}</strong>
+        </div>
+    </div>
+
+    <div class="table-container table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Course Code</th>
+                    <th>Course Name</th>
+                    <th>Credits</th>
+                    <th>School</th>
+                    <th>Department</th>
+                    <th>Semester</th>
+                    <th>Prerequisites</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td><span class="course-code">{{ course.courseID }}</span></td>
+                    <td>{{ course.name }}</td>
+                    <td><span class="course-credits">{{ course.credits }}</span></td>
+                    <td>
+                        {% if course.school %}
+                            <span class="school-badge school-{{ course.school }}">{{ course.school }}</span>
+                        {% else %}
+                            <span class="school-badge school-default">—</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="dept-badge">{{ course.department }}</span></td>
+                    <td>{{ course.semesterOffered }}</td>
+                    <td>{% if course.prerequisites.all %}{% for p in course.prerequisites.all %}{{ p.requiredCourse.courseID }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}None{% endif %}</td>
+                    <td><button type="button" class="btn-view" onclick="toggleDetails('{{ course.courseID }}')">View Details</button></td>
+                </tr>
+                <tr class="details-row" id="details-{{ course.courseID }}">
+                    <td colspan="8">
+                        <div class="details-cell">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <h6 style="color:#001f3f; font-weight:700;">Course Overview</h6>
+                                    <p class="mb-2">{{ course.description|default:"No description available." }}</p>
+                                    {% if course.category %}
+                                    <span class="badge bg-secondary">Category: {{ course.category }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 style="color:#001f3f; font-weight:700;">Estimated Course Fee</h6>
+                                    <p class="mb-0">
+                                        <strong>₦{{ fee_structure.tuition_per_credit|floatformat:0 }}</strong> / credit<br>
+                                        Total ({{ course.credits }} credits): <strong>₦{{ course.fee_total|floatformat:0 }}</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center text-muted py-4">No courses found matching your criteria.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if courses.paginator.num_pages > 1 %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if courses.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ courses.previous_page_number }}&school={{ request.GET.school }}&department={{ request.GET.department }}&semester={{ request.GET.semester }}&search={{ request.GET.search }}">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item active">
+                <span class="page-link">{{ courses.number }} / {{ courses.paginator.num_pages }}</span>
+            </li>
+            {% if courses.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ courses.next_page_number }}&school={{ request.GET.school }}&department={{ request.GET.department }}&semester={{ request.GET.semester }}&search={{ request.GET.search }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</main>
+{% endblock %}
+{% block extra_js %}
+<script>
+function toggleDetails(courseID) {
+    const row = document.getElementById('details-' + courseID);
+    if (row) row.classList.toggle('show');
+}
+</script>
+{% endblock %}

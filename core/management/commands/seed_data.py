@@ -4,6 +4,7 @@ Seeds the database with AUN course catalog, fee structure, and test accounts
 for all 4 programs specified in the SDP technical report.
 Run this once after migrations to get real data in every page.
 """
+import os
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
 from datetime import date
@@ -11,6 +12,10 @@ from core.models import (
     User, Student, Admin, AcademicAdvisor,
     Course, Prerequisite, Enrollment, Fee, FeeStructure
 )
+
+
+# On a public server set DEMO_PASSWORD so the demo accounts don't use the well-known defaults.
+DEMO_PASSWORD = os.getenv('DEMO_PASSWORD')
 
 
 class Command(BaseCommand):
@@ -91,19 +96,19 @@ class Command(BaseCommand):
         if not User.objects.filter(email='admin@aun.edu.ng').exists():
             admin_user = User.objects.create(
                 name='AUN Admin', email='admin@aun.edu.ng',
-                passwordHash=make_password('admin1234'), role='admin',
+                passwordHash=make_password(DEMO_PASSWORD or 'admin1234'), role='admin',
             )
             Admin.objects.create(user=admin_user, department='Finance')
-            self.stdout.write('  Admin: admin@aun.edu.ng / admin1234')
+            self.stdout.write('  Admin: admin@aun.edu.ng' + ('' if DEMO_PASSWORD else ' / admin1234'))
 
         # Advisor account
         if not User.objects.filter(email='advisor@aun.edu.ng').exists():
             adv_user = User.objects.create(
                 name='Dr. Sarah James', email='advisor@aun.edu.ng',
-                passwordHash=make_password('advisor1234'), role='advisor',
+                passwordHash=make_password(DEMO_PASSWORD or 'advisor1234'), role='advisor',
             )
             AcademicAdvisor.objects.create(user=adv_user, department='Computer Science')
-            self.stdout.write('  Advisor: advisor@aun.edu.ng / advisor1234')
+            self.stdout.write('  Advisor: advisor@aun.edu.ng' + ('' if DEMO_PASSWORD else ' / advisor1234'))
 
         # Student accounts for each program
         students_data = [
@@ -117,7 +122,7 @@ class Command(BaseCommand):
             if not User.objects.filter(email=email).exists():
                 u = User.objects.create(
                     name=name, email=email,
-                    passwordHash=make_password(pwd), role='student',
+                    passwordHash=make_password(DEMO_PASSWORD or pwd), role='student',
                 )
                 s = Student.objects.create(
                     studentID=sid, user=u,
@@ -147,6 +152,6 @@ class Command(BaseCommand):
                         'totalAmount': 1060000,
                     }
                 )
-                self.stdout.write(f'  Student: {email} / {pwd}')
+                self.stdout.write(f'  Student: {email}' + ('' if DEMO_PASSWORD else f' / {pwd}'))
 
         self.stdout.write(self.style.SUCCESS('\nDone. Run the server and log in with any account above.'))

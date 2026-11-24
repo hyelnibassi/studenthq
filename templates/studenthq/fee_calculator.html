@@ -3,114 +3,287 @@
 {% block nav_fee %}active{% endblock %}
 {% block extra_css %}
 <style>
-    .page-header { background: linear-gradient(135deg, #1a3a52 0%, #2c5aa0 100%); color: white; padding: 3rem 0; margin-bottom: 3rem; text-align: center; }
-    .page-header h1 { font-weight: 700; margin-bottom: 0.5rem; }
-    .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 8px; }
-    .card-header { background: linear-gradient(135deg, #1a3a52 0%, #2c5aa0 100%); color: white; font-weight: 600; border: none; padding: 1.5rem; }
-    .form-label { font-weight: 600; color: #1a3a52; margin-bottom: 0.5rem; }
-    .form-control, .form-select { border: 1px solid #ddd; border-radius: 6px; padding: 0.75rem 1rem; }
-    .mandatory-fees-section { background-color: #f8f9fa; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
-    .mandatory-fees-section h5 { color: #1a3a52; font-weight: 600; margin-bottom: 1rem; }
-    .btn-calculate { background: linear-gradient(135deg, #2c5aa0 0%, #1a3a52 100%); border: none; color: white; font-weight: 600; padding: 0.75rem 2rem; border-radius: 6px; font-size: 1.05rem; width: 100%; }
-    .breakdown-table thead th { color: #1a3a52; font-weight: 600; border: none; padding: 1rem; }
-    .breakdown-table thead { background-color: #f8f9fa; border-top: 2px solid #1a3a52; }
-    .breakdown-table tbody td { padding: 1rem; }
-    .total-row { background-color: #f8f9fa; border-top: 2px solid #1a3a52 !important; font-weight: 700; color: #1a3a52; font-size: 1.1rem; }
-    .amount { color: #2c5aa0; font-weight: 600; }
-    .penalty-row { background-color: #ffe6e6; }
-    .penalty-row td { color: #dc3545; }
-    .policy-note { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 4px; margin-top: 1.5rem; }
+    .page-header {
+        background-color: #14284b;
+        color: white;
+        padding: 2.25rem 0;
+        margin-bottom: 1.75rem;
+        border-bottom: 4px solid #d99b26;
+    }
+    .page-header h1 {
+        font-family: 'Source Serif 4', Georgia, serif;
+        font-weight: 700;
+        font-size: 2.1rem;
+        margin-bottom: 0.25rem;
+    }
+    .card {
+        border: 1px solid #e5e1d8;
+        box-shadow: 0 1px 4px rgba(20, 40, 75, 0.05);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .card-header {
+        background-color: #14284b;
+        color: white;
+        font-weight: 700;
+        border-bottom: 3px solid #d99b26;
+        padding: 1rem 1.35rem;
+    }
+    .form-label { font-weight: 700; color: #14284b; margin-bottom: 0.4rem; font-size: 0.9rem; }
+    .form-control, .form-select { border: 1px solid #d7d2c6; border-radius: 7px; padding: 0.65rem 0.9rem; }
+    .fees-box {
+        background-color: #faf9f5;
+        border: 1px solid #e5e1d8;
+        padding: 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1.25rem;
+    }
+    .fees-box h6 {
+        font-family: 'Source Serif 4', Georgia, serif;
+        color: #14284b;
+        font-weight: 700;
+        margin-bottom: 0.85rem;
+    }
+    .btn-calculate {
+        background-color: #14284b;
+        border: none;
+        color: white;
+        font-weight: 700;
+        padding: 0.75rem 1.5rem;
+        border-radius: 7px;
+        font-size: 1rem;
+        width: 100%;
+    }
+    .btn-calculate:hover { background-color: #1d6f8a; color: white; }
+    .breakdown-table thead { background-color: #f6f4ef; border-bottom: 2px solid #e5e1d8; }
+    .breakdown-table thead th { color: #14284b; font-weight: 700; padding: 0.85rem 1rem; font-size: 0.82rem; text-transform: uppercase; }
+    .breakdown-table tbody td { padding: 0.8rem 1rem; border-color: #f0ede6; }
+    .total-row { background-color: #f6f4ef; border-top: 2px solid #14284b !important; font-weight: 700; color: #14284b; font-size: 1.05rem; }
+    .annual-row { background-color: #eaf5f0; font-weight: 700; color: #175943; }
+    .amount { color: #14284b; font-weight: 700; white-space: nowrap; }
+    .penalty-row { background-color: #fbe9e6; }
+    .penalty-row td { color: #a63d28; }
+    .bank-card {
+        background-color: #fdf8ec;
+        border: 1px solid #ecd9a8;
+        border-left: 5px solid #d99b26;
+        border-radius: 8px;
+        padding: 1.1rem 1.25rem;
+    }
+    .policy-note {
+        background-color: #faf9f5;
+        border: 1px solid #e5e1d8;
+        border-left: 4px solid #1d6f8a;
+        padding: 1rem 1.15rem;
+        border-radius: 6px;
+        font-size: 0.88rem;
+    }
 </style>
 {% endblock %}
 {% block content %}
 <div class="page-header">
-    <div class="container">
-        <h1>Semester Fee Calculator</h1>
-        <p style="font-size:1.1rem; opacity:0.9;">Calculate your semester fees based on your enrollment and accommodation</p>
+    <div class="container-fluid px-4">
+        <h1>2025/2026 Undergraduate Fee Calculator</h1>
+        <p class="mb-0" style="opacity:0.88;">Official AUN Fall 2025 &amp; Spring 2026 Tuition, Housing, Meal Plan &amp; Other Fees</p>
     </div>
 </div>
-<main class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-7 mb-4">
+
+<main class="container-fluid px-4 pb-5">
+    <div class="row g-4">
+        <div class="col-lg-6">
             <div class="card">
-                <div class="card-header">Fee Calculator</div>
+                <div class="card-header">Calculate Semester &amp; Full-Year Fees</div>
                 <div class="card-body p-4">
                     <form method="POST" action="{% url 'fee_calculator' %}">
                         {% csrf_token %}
-                        <div class="mb-4">
-                            <label for="creditHours" class="form-label">Number of Credit Hours Enrolled</label>
-                            <input type="number" class="form-control" id="creditHours" name="credit_hours" min="1" max="24" value="{{ form_data.credit_hours|default:15 }}" required>
-                            <small class="form-text text-muted">Minimum 1, Maximum 24 credit hours per semester</small>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="programType" class="form-label">Program Billing Type</label>
+                                <select class="form-select" id="programType" name="program_type">
+                                    <option value="standard" {% if form_data.program_type != 'law' %}selected{% endif %}>Standard (₦{{ fee_structure.tuition_per_credit|floatformat:0 }} / credit)</option>
+                                    <option value="law" {% if form_data.program_type == 'law' %}selected{% endif %}>Law — Flat Rate (₦{{ fee_structure.law_tuition_flat|floatformat:0 }})</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="creditHours" class="form-label">Credit Hours (Per Semester)</label>
+                                <input type="number" class="form-control" id="creditHours" name="credit_hours" min="1" max="24" value="{{ form_data.credit_hours|default:15 }}" required>
+                                <small class="text-muted">Standard load: 15 cr (₦1,221,000). Extra credits @ ₦{{ fee_structure.tuition_per_credit|floatformat:0 }}/cr.</small>
+                            </div>
                         </div>
-                        <div class="mb-4">
-                            <label for="accommodation" class="form-label">Accommodation Type</label>
+
+                        <div class="mb-3">
+                            <label for="accommodation" class="form-label">Housing Option (Per Semester)</label>
                             <select class="form-select" id="accommodation" name="accommodation" required>
-                                <option value="">-- Select accommodation type --</option>
-                                <option value="on-campus" {% if form_data.accommodation == 'on-campus' %}selected{% endif %}>On-Campus (₦250,000)</option>
-                                <option value="off-campus" {% if form_data.accommodation == 'off-campus' %}selected{% endif %}>Off-Campus (₦180,000)</option>
-                                <option value="none" {% if form_data.accommodation == 'none' %}selected{% endif %}>None</option>
+                                <option value="double_with" {% if form_data.accommodation == 'double_with' %}selected{% endif %}>Double Room with Facilities (En Suite) — ₦{{ fee_structure.housing_double_with_facilities|floatformat:0 }}</option>
+                                <option value="double_without" {% if form_data.accommodation == 'double_without' %}selected{% endif %}>Double Room without Facilities — ₦{{ fee_structure.housing_double_without_facilities|floatformat:0 }}</option>
+                                <option value="triple_with" {% if form_data.accommodation == 'triple_with' %}selected{% endif %}>Triple Room with Facilities (En Suite) — ₦{{ fee_structure.housing_triple_with_facilities|floatformat:0 }}</option>
+                                <option value="triple_without" {% if form_data.accommodation == 'triple_without' %}selected{% endif %}>Triple Room without Facilities — ₦{{ fee_structure.housing_triple_without_facilities|floatformat:0 }}</option>
+                                <option value="four_with" {% if form_data.accommodation == 'four_with' %}selected{% endif %}>Four Room with Facilities (En Suite) — ₦{{ fee_structure.housing_four_with_facilities|floatformat:0 }}</option>
+                                <option value="none" {% if form_data.accommodation == 'none' %}selected{% endif %}>Off-Campus / No Residence Hall — ₦0</option>
                             </select>
                         </div>
-                        <div class="mandatory-fees-section">
-                            <h5>Mandatory Fees</h5>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="sportsFee" name="fees" value="sports" {% if 'sports' in form_data.fees %}checked{% endif %}>
-                                <label class="form-check-label" for="sportsFee">Sports Fee — ₦15,000</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="labFee" name="fees" value="lab" {% if 'lab' in form_data.fees %}checked{% endif %}>
-                                <label class="form-check-label" for="labFee">Lab Fee — ₦25,000</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="libraryFee" name="fees" value="library" {% if 'library' in form_data.fees %}checked{% endif %}>
-                                <label class="form-check-label" for="libraryFee">Library Fee — ₦20,000</label>
+
+                        <div class="mb-3">
+                            <label for="mealPlan" class="form-label">Meal Plan (Per Semester)</label>
+                            <select class="form-select" id="mealPlan" name="meal_plan" required>
+                                <option value="21_meals" {% if form_data.meal_plan == '21_meals' %}selected{% endif %}>21 Meals per Week — ₦{{ fee_structure.meal_plan_21|floatformat:0 }}</option>
+                                <option value="14_meals" {% if form_data.meal_plan == '14_meals' %}selected{% endif %}>14 Meals per Week — ₦{{ fee_structure.meal_plan_14|floatformat:0 }}</option>
+                                <option value="7_meals" {% if form_data.meal_plan == '7_meals' %}selected{% endif %}>7 Meals per Week (Min. for Hall Residents) — ₦{{ fee_structure.meal_plan_7|floatformat:0 }}</option>
+                                <option value="none" {% if form_data.meal_plan == 'none' %}selected{% endif %}>None (Off-Campus Students Only) — ₦0</option>
+                            </select>
+                        </div>
+
+                        <div class="fees-box">
+                            <h6>Other Semester Fees</h6>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sportsFee" name="fees" value="sports" {% if 'sports' in form_data.fees %}checked{% endif %}>
+                                        <label class="form-check-label" for="sportsFee">Sport Fee — ₦{{ fee_structure.sports_fee|floatformat:0 }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="activityFee" name="fees" value="activity" {% if 'activity' in form_data.fees %}checked{% endif %}>
+                                        <label class="form-check-label" for="activityFee">Student Activity Fee — ₦{{ fee_structure.student_activity_fee|floatformat:0 }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="healthFee" name="fees" value="health" {% if 'health' in form_data.fees %}checked{% endif %}>
+                                        <label class="form-check-label" for="healthFee">Health Insurance — ₦{{ fee_structure.health_insurance_fee|floatformat:0 }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="techFee" name="fees" value="technology" {% if 'technology' in form_data.fees %}checked{% endif %}>
+                                        <label class="form-check-label" for="techFee">Technology Fee — ₦{{ fee_structure.technology_fee|floatformat:0 }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="labFee" name="fees" value="lab" {% if 'lab' in form_data.fees %}checked{% endif %}>
+                                        <label class="form-check-label" for="labFee">Eng / Nursing / Public Health Lab — ₦{{ fee_structure.lab_fee|floatformat:0 }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="ebooksFee" name="fees" value="ebooks" {% if 'ebooks' in form_data.fees %}checked{% endif %}>
+                                        <label class="form-check-label" for="ebooksFee">E-books (Optional) — ₦{{ fee_structure.ebooks_fee|floatformat:0 }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="idCardFee" name="fees" value="id_card" {% if 'id_card' in form_data.fees %}checked{% endif %}>
+                                        <label class="form-check-label" for="idCardFee">Student Identity Card (New students only) — ₦{{ fee_structure.student_id_card_fee|floatformat:0 }}</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
                         <div class="mb-4">
-                            <label for="monthsOverdue" class="form-label">Months Overdue</label>
+                            <label for="monthsOverdue" class="form-label">Months Overdue (Optional)</label>
                             <input type="number" class="form-control" id="monthsOverdue" name="months_overdue" min="0" value="{{ form_data.months_overdue|default:0 }}" required>
-                            <small class="form-text text-muted">Enter 0 if payment is not yet late</small>
+                            <small class="text-muted">Enter 0 if paying on time (Late penalty: ₦30,000/month)</small>
                         </div>
-                        <button type="submit" class="btn btn-calculate btn-lg">Calculate Fees</button>
+
+                        <button type="submit" class="btn btn-calculate">Calculate 2025/2026 Fees</button>
                     </form>
                 </div>
             </div>
         </div>
 
-        {% if result %}
-        <div class="col-lg-7">
-            <div class="card">
-                <div class="card-header">Fees Breakdown</div>
+        <div class="col-lg-6">
+            {% if result %}
+            <div class="card mb-4">
+                <div class="card-header">2025/2026 Fees Breakdown</div>
                 <div class="card-body p-0">
                     <table class="table breakdown-table mb-0">
                         <thead>
-                            <tr><th>Description</th><th class="text-end">Amount</th></tr>
+                            <tr><th>Description</th><th class="text-end">Per Semester</th><th class="text-end">Full Year (2 Sem)</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Tuition Fee ({{ result.credit_hours }} credits × ₦50,000)</td><td class="amount text-end">₦{{ result.tuition|floatformat:0 }}</td></tr>
-                            <tr><td>Accommodation Fee ({{ result.accommodation_type }})</td><td class="amount text-end">₦{{ result.accommodation_fee|floatformat:0 }}</td></tr>
-                            {% if result.sports_fee %}<tr><td>Sports Fee</td><td class="amount text-end">₦15,000</td></tr>{% endif %}
-                            {% if result.lab_fee %}<tr><td>Lab Fee</td><td class="amount text-end">₦25,000</td></tr>{% endif %}
-                            {% if result.library_fee %}<tr><td>Library Fee</td><td class="amount text-end">₦20,000</td></tr>{% endif %}
+                            <tr>
+                                <td>{{ result.tuition_label }}</td>
+                                <td class="amount text-end">₦{{ result.tuition|floatformat:0 }}</td>
+                                <td class="text-end text-muted">₦{% widthratio result.tuition 1 2 %}</td>
+                            </tr>
+                            <tr>
+                                <td>Housing ({{ result.accommodation_type }})</td>
+                                <td class="amount text-end">₦{{ result.accommodation_fee|floatformat:0 }}</td>
+                                <td class="text-end text-muted">₦{% widthratio result.accommodation_fee 1 2 %}</td>
+                            </tr>
+                            <tr>
+                                <td>Meal Plan ({{ result.meal_plan_label }})</td>
+                                <td class="amount text-end">₦{{ result.meal_fee|floatformat:0 }}</td>
+                                <td class="text-end text-muted">₦{% widthratio result.meal_fee 1 2 %}</td>
+                            </tr>
+                            {% if result.sports_fee %}
+                            <tr><td>Sport Fee</td><td class="amount text-end">₦{{ result.sports_fee|floatformat:0 }}</td><td class="text-end text-muted">₦{% widthratio result.sports_fee 1 2 %}</td></tr>
+                            {% endif %}
+                            {% if result.student_activity_fee %}
+                            <tr><td>Student Activity Fee</td><td class="amount text-end">₦{{ result.student_activity_fee|floatformat:0 }}</td><td class="text-end text-muted">₦{% widthratio result.student_activity_fee 1 2 %}</td></tr>
+                            {% endif %}
+                            {% if result.health_insurance_fee %}
+                            <tr><td>Health Insurance Fee</td><td class="amount text-end">₦{{ result.health_insurance_fee|floatformat:0 }}</td><td class="text-end text-muted">₦{% widthratio result.health_insurance_fee 1 2 %}</td></tr>
+                            {% endif %}
+                            {% if result.technology_fee %}
+                            <tr><td>Technology Fee</td><td class="amount text-end">₦{{ result.technology_fee|floatformat:0 }}</td><td class="text-end text-muted">₦{% widthratio result.technology_fee 1 2 %}</td></tr>
+                            {% endif %}
+                            {% if result.lab_fee %}
+                            <tr><td>Engineering / Nursing / Public Health Lab Fee</td><td class="amount text-end">₦{{ result.lab_fee|floatformat:0 }}</td><td class="text-end text-muted">₦{% widthratio result.lab_fee 1 2 %}</td></tr>
+                            {% endif %}
+                            {% if result.ebooks_fee %}
+                            <tr><td>E-books (Optional)</td><td class="amount text-end">₦{{ result.ebooks_fee|floatformat:0 }}</td><td class="text-end text-muted">₦{% widthratio result.ebooks_fee 1 2 %}</td></tr>
+                            {% endif %}
+                            {% if result.student_id_card_fee %}
+                            <tr><td>Student Identity Card (New students)</td><td class="amount text-end">₦{{ result.student_id_card_fee|floatformat:0 }}</td><td class="text-end text-muted">₦{% widthratio result.student_id_card_fee 1 2 %}</td></tr>
+                            {% endif %}
                             {% if result.penalty > 0 %}
                             <tr class="penalty-row">
-                                <td>Late Payment Penalty (₦30,000 × {{ result.months_overdue }} months)</td>
+                                <td>Late Payment Penalty (₦30,000 × {{ result.months_overdue }} mo)</td>
                                 <td class="amount text-end">₦{{ result.penalty|floatformat:0 }}</td>
+                                <td class="text-end">—</td>
                             </tr>
                             {% endif %}
                             <tr class="total-row">
-                                <td><strong>Total Amount Due</strong></td>
-                                <td class="amount text-end"><strong>₦{{ result.total|floatformat:0 }}</strong></td>
+                                <td><strong>Total Payable (Fall 2025 / Per Semester)</strong></td>
+                                <td class="amount text-end" colspan="2"><strong>₦{{ result.total|floatformat:0 }}</strong></td>
+                            </tr>
+                            <tr class="annual-row">
+                                <td><strong>Estimated Full Academic Year (Fall + Spring)</strong></td>
+                                <td class="text-end" colspan="2"><strong>₦{{ result.annual_total|floatformat:0 }}</strong></td>
                             </tr>
                         </tbody>
                     </table>
-                    <div class="policy-note m-3">
-                        <p><strong>⚠️ Late Payment Policy:</strong> <span style="color:#dc3545; font-weight:700;">Late payment penalty is ₦30,000 per month overdue as per AUN policy.</span></p>
-                    </div>
                 </div>
             </div>
+            {% endif %}
+
+            <!-- Official AUN Bank Details -->
+            <div class="bank-card mb-4">
+                <h6 style="font-family:'Source Serif 4', Georgia, serif; font-weight:700; color:#14284b; margin-bottom:0.65rem;">
+                    <i class="bi bi-bank2 me-1" style="color:#b87e14;"></i> Official AUN Fee Payment Bank Details
+                </h6>
+                <div class="small">
+                    <div><strong>Bank Name:</strong> Jaiz Bank</div>
+                    <div><strong>Account Name:</strong> AUN Undergraduate Fees Collection Account</div>
+                    <div><strong>Account Number:</strong> <code style="font-size:0.95rem; font-weight:700; color:#14284b;">0017780991</code></div>
+                </div>
+            </div>
+
+            <!-- Policy Notes -->
+            <div class="policy-note">
+                <h6 style="font-weight:700; color:#14284b;">2025/2026 Fee Schedule Notes</h6>
+                <ul class="mb-0 ps-3">
+                    <li>Additional credits above 15 credits/semester are billed at <strong>₦81,400/credit</strong> (Law is a flat rate of <strong>₦1,221,000</strong>/semester).</li>
+                    <li>"With facilities" means each room has a full en suite bathroom.</li>
+                    <li>Every student living in AUN residence halls is required to enroll in a meal plan (minimum <strong>7 meals/week</strong>).</li>
+                    <li>Lab fee (₦66,000) applies to Engineering, Nursing, and Public Health students only.</li>
+                    <li>Late payment penalty is <strong>₦30,000 per month overdue</strong>.</li>
+                </ul>
+            </div>
         </div>
-        {% endif %}
     </div>
 </main>
 {% endblock %}

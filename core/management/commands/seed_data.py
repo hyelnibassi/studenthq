@@ -22,14 +22,28 @@ class Command(BaseCommand):
     help = 'Seeds Student HQ with AUN course catalog and test accounts'
 
     def handle(self, *args, **options):
-        self.stdout.write('Seeding fee structure...')
-        FeeStructure.objects.get_or_create(pk=1, defaults={
-            'tuition_per_credit': 50000,
-            'accommodation_on_campus': 250000,
-            'accommodation_off_campus': 180000,
-            'sports_fee': 15000,
-            'lab_fee': 25000,
-            'library_fee': 20000,
+        self.stdout.write('Seeding fee structure (2025/2026 AUN Undergraduate rates)...')
+        FeeStructure.objects.update_or_create(pk=1, defaults={
+            'tuition_per_credit': 81400,
+            'law_tuition_flat': 1221000,
+            'housing_double_with_facilities': 487500,
+            'housing_double_without_facilities': 342000,
+            'housing_triple_with_facilities': 375000,
+            'housing_triple_without_facilities': 270000,
+            'housing_four_with_facilities': 281250,
+            'accommodation_on_campus': 375000,
+            'accommodation_off_campus': 0,
+            'meal_plan_21': 763089,
+            'meal_plan_14': 559598,
+            'meal_plan_7': 307913,
+            'sports_fee': 41250,
+            'student_activity_fee': 49500,
+            'health_insurance_fee': 30700,
+            'ebooks_fee': 200000,
+            'lab_fee': 66000,
+            'technology_fee': 57750,
+            'student_id_card_fee': 10000,
+            'library_fee': 0,
             'late_penalty_per_month': 30000,
         })
 

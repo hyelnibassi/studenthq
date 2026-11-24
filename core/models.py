@@ -258,15 +258,36 @@ class AdvisorComment(models.Model):
 
 
 class FeeStructure(models.Model):
-    """Singleton table — always use pk=1. Admin can update via the fee structure page."""
-    tuition_per_credit       = models.FloatField(default=50000)
-    accommodation_on_campus  = models.FloatField(default=250000)
-    accommodation_off_campus = models.FloatField(default=180000)
-    sports_fee               = models.FloatField(default=15000)
-    lab_fee                  = models.FloatField(default=25000)
-    library_fee              = models.FloatField(default=20000)
-    late_penalty_per_month   = models.FloatField(default=30000)
-    updated_at               = models.DateTimeField(auto_now=True)
+    """Singleton table — always use pk=1. Defaults reflect AUN 2025/2026 Undergraduate Fee Structure."""
+    tuition_per_credit                = models.FloatField(default=81400)
+    law_tuition_flat                  = models.FloatField(default=1221000)
+
+    # Housing options (per semester)
+    housing_double_with_facilities    = models.FloatField(default=487500)
+    housing_double_without_facilities = models.FloatField(default=342000)
+    housing_triple_with_facilities    = models.FloatField(default=375000)
+    housing_triple_without_facilities = models.FloatField(default=270000)
+    housing_four_with_facilities      = models.FloatField(default=281250)
+    accommodation_on_campus           = models.FloatField(default=375000)
+    accommodation_off_campus          = models.FloatField(default=0)
+
+    # Meal plans (per semester)
+    meal_plan_21                      = models.FloatField(default=763089)
+    meal_plan_14                      = models.FloatField(default=559598)
+    meal_plan_7                       = models.FloatField(default=307913)
+
+    # Other fees (per semester)
+    sports_fee                        = models.FloatField(default=41250)
+    student_activity_fee              = models.FloatField(default=49500)
+    health_insurance_fee              = models.FloatField(default=30700)
+    ebooks_fee                        = models.FloatField(default=200000)
+    lab_fee                           = models.FloatField(default=66000)
+    technology_fee                    = models.FloatField(default=57750)
+    student_id_card_fee               = models.FloatField(default=10000)
+    library_fee                       = models.FloatField(default=0)
+
+    late_penalty_per_month            = models.FloatField(default=30000)
+    updated_at                        = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'fee_structure'

@@ -75,6 +75,24 @@ class FeeCalculationTests(TestCase):
         result = self.engine.compute(0, 'none', [])
         self.assertEqual(result['tuition'], 0)
 
+    def test_aun_2025_2026_official_fee_rates(self):
+        fs_2025 = FeeStructure()  # uses 2025/2026 defaults
+        engine = FeeCalculationEngine(fs_2025)
+        res = engine.compute(
+            15, 'triple_with',
+            ['sports', 'activity', 'health', 'ebooks', 'lab', 'technology', 'id_card'],
+            months_overdue=0, is_law=False, meal_plan='14_meals',
+        )
+        self.assertEqual(res['tuition'], 1221000)
+        self.assertEqual(res['accommodation_fee'], 375000)
+        self.assertEqual(res['meal_fee'], 559598)
+        self.assertEqual(res['mandatory_total'], 455200)
+        self.assertEqual(res['total'], 1221000 + 375000 + 559598 + 455200)
+        self.assertEqual(res['annual_total'], res['total'] * 2)
+
+        law_res = engine.compute(18, 'none', [], is_law=True)
+        self.assertEqual(law_res['tuition'], 1221000)
+
 
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------

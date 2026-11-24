@@ -7,45 +7,78 @@ class FeeCalculationEngine:
     def __init__(self, fee_structure):
         self.fs = fee_structure
 
-    def compute(self, credit_hours, accommodation, fees_selected, months_overdue=0):
+    def compute(self, credit_hours, accommodation, fees_selected, months_overdue=0, is_law=False, meal_plan='none'):
         """
-        Compute total semester fee.
-        accommodation: 'on-campus' | 'off-campus' | 'none'
-        fees_selected: list containing any of 'sports', 'lab', 'library'
-        months_overdue: int >= 0
-        Returns a dict with full breakdown.
+        Compute total semester fee using the AUN 2025/2026 Undergraduate Fee Structure.
+        accommodation: 'double_with' | 'double_without' | 'triple_with' | 'triple_without' | 'four_with'
+                       | 'on-campus' | 'off-campus' | 'none'
+        meal_plan: '21_meals' | '14_meals' | '7_meals' | 'none'
+        fees_selected: list containing any of 'sports', 'activity', 'health', 'technology',
+                       'lab', 'ebooks', 'id_card', 'library'
         """
-        tuition = credit_hours * self.fs.tuition_per_credit
-
-        if accommodation == 'on-campus':
-            acc_fee = self.fs.accommodation_on_campus
-            acc_label = 'On-Campus'
-        elif accommodation == 'off-campus':
-            acc_fee = self.fs.accommodation_off_campus
-            acc_label = 'Off-Campus'
+        if is_law:
+            tuition = self.fs.law_tuition_flat
+            tuition_label = "Tuition (Law Flat Rate)"
         else:
-            acc_fee = 0
-            acc_label = 'None'
+            tuition = credit_hours * self.fs.tuition_per_credit
+            tuition_label = f"Tuition ({credit_hours} credits × ₦{int(self.fs.tuition_per_credit):,})"
 
-        sports = self.fs.sports_fee if 'sports' in fees_selected else 0
-        lab = self.fs.lab_fee if 'lab' in fees_selected else 0
-        library = self.fs.library_fee if 'library' in fees_selected else 0
-        mandatory = sports + lab + library
+        housing_map = {
+            'double_with':    (self.fs.housing_double_with_facilities, 'Double Room with Facilities'),
+            'double_without': (self.fs.housing_double_without_facilities, 'Double Room without Facilities'),
+            'triple_with':    (self.fs.housing_triple_with_facilities, 'Triple Room with Facilities'),
+            'triple_without': (self.fs.housing_triple_without_facilities, 'Triple Room without Facilities'),
+            'four_with':      (self.fs.housing_four_with_facilities, 'Four Room with Facilities'),
+            'on-campus':      (self.fs.accommodation_on_campus, 'On-Campus'),
+            'off-campus':     (self.fs.accommodation_off_campus, 'Off-Campus'),
+            'none':           (0, 'None (Off-Campus)'),
+        }
+        acc_fee, acc_label = housing_map.get(accommodation, (0, 'None'))
 
+        meal_map = {
+            '21_meals': (self.fs.meal_plan_21, '21 Meals per Week'),
+            '14_meals': (self.fs.meal_plan_14, '14 Meals per Week'),
+            '7_meals':  (self.fs.meal_plan_7, '7 Meals per Week'),
+            'none':     (0, 'None'),
+        }
+        meal_fee, meal_label = meal_map.get(meal_plan, (0, 'None'))
+
+        sports     = self.fs.sports_fee if 'sports' in fees_selected else 0
+        activity   = self.fs.student_activity_fee if 'activity' in fees_selected else 0
+        health     = self.fs.health_insurance_fee if 'health' in fees_selected else 0
+        technology = self.fs.technology_fee if 'technology' in fees_selected else 0
+        lab        = self.fs.lab_fee if 'lab' in fees_selected else 0
+        ebooks     = self.fs.ebooks_fee if 'ebooks' in fees_selected else 0
+        id_card    = self.fs.student_id_card_fee if 'id_card' in fees_selected else 0
+        library    = self.fs.library_fee if 'library' in fees_selected else 0
+
+        mandatory = sports + activity + health + technology + lab + ebooks + id_card + library
         penalty = max(0, months_overdue) * self.LATE_PENALTY_PER_MONTH
-        total = tuition + acc_fee + mandatory + penalty
+        semester_subtotal = tuition + acc_fee + meal_fee + mandatory
+        total = semester_subtotal + penalty
 
         return {
             'credit_hours': credit_hours,
+            'is_law': is_law,
             'tuition': tuition,
+            'tuition_label': tuition_label,
             'accommodation_fee': acc_fee,
             'accommodation_type': acc_label,
+            'meal_fee': meal_fee,
+            'meal_plan_label': meal_label,
             'sports_fee': sports,
+            'student_activity_fee': activity,
+            'health_insurance_fee': health,
+            'technology_fee': technology,
             'lab_fee': lab,
+            'ebooks_fee': ebooks,
+            'student_id_card_fee': id_card,
             'library_fee': library,
             'mandatory_total': mandatory,
             'penalty': penalty,
             'months_overdue': months_overdue,
+            'semester_subtotal': semester_subtotal,
+            'annual_total': semester_subtotal * 2,
             'total': total,
         }
 

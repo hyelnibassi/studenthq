@@ -220,25 +220,50 @@ def dashboard(request):
 def fee_calculator(request):
     user      = get_logged_in_user(request)
     result    = None
-    form_data = {}
     fs        = FeeStructure.objects.filter(pk=1).first() or FeeStructure()
     engine    = FeeCalculationEngine(fs)
+    form_data = {
+        'credit_hours': 15,
+        'program_type': 'standard',
+        'accommodation': 'triple_with',
+        'meal_plan': '7_meals',
+        'fees': ['sports', 'activity', 'health', 'technology'],
+        'months_overdue': 0,
+    }
 
     if request.method == 'POST':
-        credit_hours   = int(request.POST.get('credit_hours', 0))
+        credit_hours   = int(request.POST.get('credit_hours', 15))
+        program_type   = request.POST.get('program_type', 'standard')
+        is_law         = (program_type == 'law')
         accommodation  = request.POST.get('accommodation', 'none')
+        meal_plan      = request.POST.get('meal_plan', 'none')
         fees_selected  = request.POST.getlist('fees')
         months_overdue = int(request.POST.get('months_overdue', 0))
+
+        # AUN Policy Note #3: On-campus residents must have at least 7 meals/week
+        on_campus_keys = {'double_with', 'double_without', 'triple_with', 'triple_without', 'four_with', 'on-campus'}
+        if accommodation in on_campus_keys and meal_plan == 'none':
+            meal_plan = '7_meals'
+            messages.info(request, "Per AUN policy, students living in residence halls are required to have a meal plan (minimum 7 meals/week). Automatically applied 7 Meals/Week.")
+
         form_data = {
             'credit_hours':   credit_hours,
+            'program_type':   program_type,
             'accommodation':  accommodation,
+            'meal_plan':      meal_plan,
             'fees':           fees_selected,
             'months_overdue': months_overdue,
         }
-        result = engine.compute(credit_hours, accommodation, fees_selected, months_overdue)
+        result = engine.compute(
+            credit_hours, accommodation, fees_selected,
+            months_overdue=months_overdue, is_law=is_law, meal_plan=meal_plan
+        )
 
     return render(request, 'studenthq/fee_calculator.html', {
-        'user': user, 'result': result, 'form_data': form_data,
+        'user': user,
+        'result': result,
+        'form_data': form_data,
+        'fee_structure': fs,
     })
 @role_required('student')
 def payment_history(request):
@@ -623,8 +648,15 @@ def admin_fee_structure(request):
 
     if request.method == 'POST':
         fields = [
-            'tuition_per_credit', 'accommodation_on_campus',
-            'accommodation_off_campus', 'sports_fee', 'lab_fee', 'library_fee',
+            'tuition_per_credit', 'law_tuition_flat',
+            'housing_double_with_facilities', 'housing_double_without_facilities',
+            'housing_triple_with_facilities', 'housing_triple_without_facilities',
+            'housing_four_with_facilities',
+            'accommodation_on_campus', 'accommodation_off_campus',
+            'meal_plan_21', 'meal_plan_14', 'meal_plan_7',
+            'sports_fee', 'student_activity_fee', 'health_insurance_fee',
+            'ebooks_fee', 'lab_fee', 'technology_fee', 'student_id_card_fee',
+            'library_fee',
         ]
         changed_any = False
         for field in fields:

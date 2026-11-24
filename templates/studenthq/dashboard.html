@@ -3,420 +3,379 @@
 {% block nav_dashboard %}active{% endblock %}
 {% block extra_css %}
 <style>
-    /* Vibrant College Hero Banner */
-    .welcome-section {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 48%, #0ea5e9 100%);
-        color: white;
-        padding: 2.5rem 2.25rem;
-        margin-bottom: 2rem;
-        border-radius: 20px;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 14px 34px rgba(79, 70, 229, 0.28);
+    /* Grounded Collegiate Student Header */
+    .student-banner {
+        background-color: #ffffff;
+        border: 1px solid #e5e1d8;
+        border-top: 5px solid #14284b;
+        border-radius: 10px;
+        padding: 1.75rem 2rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 2px 6px rgba(20, 40, 75, 0.05);
     }
-    .welcome-section::before {
-        content: '';
-        position: absolute;
-        top: -55px;
-        right: -45px;
-        width: 240px;
-        height: 240px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.12);
-        pointer-events: none;
-    }
-    .welcome-section::after {
-        content: '';
-        position: absolute;
-        bottom: -70px;
-        right: 160px;
-        width: 190px;
-        height: 190px;
-        border-radius: 50%;
-        background: rgba(245, 158, 11, 0.22);
-        pointer-events: none;
-    }
-    .welcome-avatar {
-        width: 66px;
-        height: 66px;
-        border-radius: 18px;
-        background: linear-gradient(135deg, #f59e0b, #ec4899);
+    .student-initials {
+        width: 56px;
+        height: 56px;
+        border-radius: 10px;
+        background-color: #14284b;
+        color: #f3c969;
+        font-family: 'Source Serif 4', Georgia, serif;
+        font-size: 1.55rem;
+        font-weight: 700;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.75rem;
-        font-weight: 800;
-        color: white;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         flex-shrink: 0;
     }
-    .welcome-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.35rem; letter-spacing: -0.3px; }
-    .hero-pill {
-        display: inline-flex;
+    .welcome-title {
+        font-family: 'Source Serif 4', Georgia, serif;
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: #14284b;
+        margin-bottom: 0.25rem;
+    }
+    .student-meta {
+        color: #5c6675;
+        font-size: 0.95rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.25rem;
         align-items: center;
-        gap: 0.4rem;
-        background: rgba(255, 255, 255, 0.18);
-        backdrop-filter: blur(6px);
-        padding: 0.4rem 0.9rem;
-        border-radius: 999px;
-        font-size: 0.88rem;
-        font-weight: 600;
-        border: 1px solid rgba(255, 255, 255, 0.28);
     }
-    .hero-pill-gold {
-        background: linear-gradient(135deg, #f59e0b, #f97316);
-        border: none;
-        color: #fff;
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    .student-meta span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .term-box {
+        background-color: #fdf8ec;
+        border: 1px solid #ecd9a8;
+        border-left: 4px solid #d99b26;
+        border-radius: 8px;
+        padding: 0.7rem 1.1rem;
+        display: inline-block;
+        text-align: left;
     }
+    .term-box-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.6px; color: #8c6212; font-weight: 700; }
+    .term-box-value { font-size: 1.05rem; font-weight: 700; color: #14284b; }
 
-    /* Color-Coded KPI Cards */
+    /* Warm Color-Coded Stat Cards */
     .summary-card {
-        background: white;
-        border-radius: 18px;
-        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
-        padding: 1.6rem 1.4rem;
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-        min-height: 175px;
+        background: #ffffff;
+        border: 1px solid #e5e1d8;
+        border-radius: 10px;
+        padding: 1.35rem 1.4rem;
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        height: 100%;
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        position: relative;
-        overflow: hidden;
+        border-left: 5px solid #14284b;
+        box-shadow: 0 1px 4px rgba(20, 40, 75, 0.04);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .summary-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
-    }
-    .summary-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-    }
-    .card-rose::before { background: linear-gradient(90deg, #f43f5e, #fb7185); }
-    .card-amber::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-    .card-emerald::before { background: linear-gradient(90deg, #10b981, #14b8a6); }
-    .card-violet::before { background: linear-gradient(90deg, #7c3aed, #6366f1); }
+    .summary-card:hover { box-shadow: 0 6px 16px rgba(20, 40, 75, 0.09); }
+    .stat-brick  { border-left-color: #c2543d; }
+    .stat-gold   { border-left-color: #d99b26; }
+    .stat-forest { border-left-color: #1f6f54; }
+    .stat-teal   { border-left-color: #1d6f8a; }
 
-    .kpi-icon-wrap {
-        width: 52px;
-        height: 52px;
-        border-radius: 14px;
+    .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; }
+    .stat-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.45px; color: #5c6675; }
+    .stat-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
-        margin-bottom: 0.9rem;
+        font-size: 1.1rem;
     }
-    .card-rose .kpi-icon-wrap { background: #ffe4e6; color: #e11d48; }
-    .card-amber .kpi-icon-wrap { background: #fef3c7; color: #d97706; }
-    .card-emerald .kpi-icon-wrap { background: #d1fae5; color: #059669; }
-    .card-violet .kpi-icon-wrap { background: #ede9fe; color: #7c3aed; }
+    .stat-brick .stat-icon  { background-color: #fbeee9; color: #b5452e; }
+    .stat-gold .stat-icon   { background-color: #fdf6e3; color: #b87e14; }
+    .stat-forest .stat-icon { background-color: #eaf5f0; color: #1f6f54; }
+    .stat-teal .stat-icon   { background-color: #e8f4f8; color: #1d6f8a; }
 
-    .card-label {
-        color: #64748b;
-        font-size: 0.8rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        margin-bottom: 0.3rem;
-    }
-    .card-value { font-size: 1.75rem; font-weight: 800; color: #0f172a; line-height: 1.2; }
-    .card-rose .card-value { color: #be123c; }
-    .card-amber .card-value { color: #b45309; }
-    .card-emerald .card-value { color: #047857; }
-    .card-violet .card-value { color: #6d28d9; }
+    .stat-value { font-size: 1.65rem; font-weight: 700; color: #14284b; line-height: 1.2; }
+    .stat-brick .stat-value  { color: #a63d28; }
+    .stat-forest .stat-value { color: #175943; }
+    .stat-sub { font-size: 0.82rem; color: #6c7585; margin-top: 0.35rem; }
 
-    /* Quick Action Campus Strip */
-    .quick-action-tile {
+    /* Tactile Campus Shortcut Links */
+    .campus-link {
+        background: #ffffff;
+        border: 1px solid #e5e1d8;
+        border-radius: 10px;
+        padding: 0.95rem 1.1rem;
         display: flex;
         align-items: center;
         gap: 0.85rem;
-        padding: 1rem 1.15rem;
-        border-radius: 14px;
         text-decoration: none;
-        color: white;
-        font-weight: 700;
-        font-size: 0.92rem;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+        color: #1c2430;
         height: 100%;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
     }
-    .quick-action-tile:hover {
-        transform: translateY(-3px);
-        color: white;
-        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.16);
-    }
-    .qa-icon {
+    .campus-link:hover { background-color: #fbfaf7; border-color: #14284b; color: #14284b; }
+    .campus-link-icon {
         width: 40px;
         height: 40px;
-        border-radius: 11px;
-        background: rgba(255, 255, 255, 0.22);
+        border-radius: 8px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         flex-shrink: 0;
+        color: #fff;
     }
-    .qa-catalog { background: linear-gradient(135deg, #2563eb, #06b6d4); }
-    .qa-register { background: linear-gradient(135deg, #7c3aed, #ec4899); }
-    .qa-progress { background: linear-gradient(135deg, #059669, #14b8a6); }
-    .qa-fees { background: linear-gradient(135deg, #f59e0b, #ea580c); }
+    .icon-catalog  { background-color: #1d6f8a; }
+    .icon-register { background-color: #14284b; }
+    .icon-progress { background-color: #1f6f54; }
+    .icon-fees     { background-color: #c2543d; }
+    .campus-link-title { font-weight: 700; font-size: 0.93rem; line-height: 1.25; }
+    .campus-link-desc  { font-size: 0.8rem; color: #6c7585; }
 
-    /* Graduation Progress Card */
-    .progress-section {
-        background: white;
-        padding: 1.75rem 2rem;
-        border-radius: 18px;
-        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
-        margin-bottom: 2rem;
-        border: 1px solid rgba(226, 232, 240, 0.85);
-    }
-    .progress-bar-custom {
-        height: 28px;
-        background-color: #eef2ff;
-        border-radius: 999px;
-        overflow: hidden;
-        box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.08);
-    }
-    .progress-bar-custom .progress-bar {
-        background: linear-gradient(90deg, #6366f1 0%, #ec4899 55%, #f59e0b 100%);
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 800;
-        font-size: 0.85rem;
-        border-radius: 999px;
-        min-width: 90px;
-    }
-
-    /* Section Panels */
-    .table-section {
-        background: white;
-        padding: 1.75rem;
-        border-radius: 18px;
-        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+    /* Degree Progress Panel */
+    .panel-card {
+        background: #ffffff;
+        border: 1px solid #e5e1d8;
+        border-radius: 10px;
+        padding: 1.5rem 1.75rem;
         margin-bottom: 1.75rem;
-        border: 1px solid rgba(226, 232, 240, 0.85);
-        height: calc(100% - 1.75rem);
+        box-shadow: 0 1px 4px rgba(20, 40, 75, 0.04);
     }
-    .section-heading {
+    .panel-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 1.25rem;
         padding-bottom: 0.85rem;
-        border-bottom: 2px solid #f1f5f9;
+        margin-bottom: 1.15rem;
+        border-bottom: 1px solid #ece8df;
     }
-    .section-heading h5 {
-        font-size: 1.08rem;
-        font-weight: 800;
-        color: #1e1b4b;
+    .panel-title {
+        font-family: 'Source Serif 4', Georgia, serif;
+        font-size: 1.18rem;
+        font-weight: 700;
+        color: #14284b;
         margin: 0;
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.55rem;
     }
-    .heading-dot {
-        width: 32px;
-        height: 32px;
-        border-radius: 10px;
-        display: inline-flex;
+    .progress-track {
+        height: 22px;
+        background-color: #edeae2;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .progress-fill {
+        background-color: #1f6f54;
+        height: 100%;
+        display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.95rem;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.8rem;
+        min-width: 72px;
     }
-    .dot-bell { background: #fef3c7; color: #d97706; }
-    .dot-book { background: #e0e7ff; color: #4f46e5; }
-    .dot-wallet { background: #d1fae5; color: #059669; }
 
-    .table thead { background: #f8fafc; }
+    /* Tables */
+    .table thead { background-color: #f6f4ef; }
     .table thead th {
-        color: #475569;
+        color: #465061;
         font-weight: 700;
+        font-size: 0.78rem;
         text-transform: uppercase;
-        font-size: 0.76rem;
-        letter-spacing: 0.6px;
-        padding: 0.85rem 0.9rem;
-        border-bottom: 2px solid #e2e8f0;
+        letter-spacing: 0.4px;
+        padding: 0.75rem 0.85rem;
+        border-bottom: 2px solid #e5e1d8;
     }
-    .table tbody td { padding: 0.9rem; vertical-align: middle; font-size: 0.92rem; border-color: #f1f5f9; }
-    .table tbody tr:hover { background-color: #f8faff; }
+    .table tbody td { padding: 0.85rem; vertical-align: middle; font-size: 0.92rem; border-color: #f0ede6; }
+    .table tbody tr:hover { background-color: #faf9f5; }
 
-    .course-pill {
+    .course-code-tag {
         display: inline-block;
-        background: #eef2ff;
-        color: #4338ca;
+        background-color: #e8f4f8;
+        color: #155369;
         font-weight: 700;
-        padding: 0.25rem 0.6rem;
-        border-radius: 6px;
+        padding: 0.2rem 0.55rem;
+        border-radius: 5px;
         font-size: 0.82rem;
-        margin-right: 0.35rem;
+        margin-right: 0.4rem;
     }
-    .sem-pill {
+    .term-tag {
         display: inline-block;
-        background: #ecfeff;
-        color: #0e7490;
-        font-weight: 700;
-        padding: 0.25rem 0.65rem;
-        border-radius: 999px;
+        background-color: #f4f1ea;
+        color: #465061;
+        font-weight: 600;
+        padding: 0.2rem 0.55rem;
+        border-radius: 5px;
         font-size: 0.8rem;
     }
-    .badge-success { background: #d1fae5; color: #065f46; padding: 0.35rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
-    .badge-warning { background: #fef3c7; color: #92400e; padding: 0.35rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
-    .badge-danger  { background: #ffe4e6; color: #be123c; padding: 0.35rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
-    .badge-info    { background: #e0f2fe; color: #0369a1; padding: 0.35rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
+    .badge-success { background-color: #e3f4ec; color: #175943; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; }
+    .badge-warning { background-color: #fdf3d8; color: #8c6212; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; }
+    .badge-danger  { background-color: #fbe9e6; color: #a63d28; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; }
+    .badge-info    { background-color: #e8f4f8; color: #155369; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; }
 </style>
 {% endblock %}
 {% block content %}
 <div class="container-fluid px-4 py-4">
-    <!-- Hero Banner -->
-    <div class="welcome-section">
-        <div class="row align-items-center g-3 position-relative" style="z-index:1;">
+    <!-- Collegiate Student Header -->
+    <div class="student-banner">
+        <div class="row align-items-center g-3">
             <div class="col-lg-8 d-flex align-items-center gap-3">
-                <div class="welcome-avatar">{{ user.name|first|upper }}</div>
+                <div class="student-initials">{{ user.name|first|upper }}</div>
                 <div>
-                    <h1 class="welcome-title">Welcome back, {{ user.name }}!</h1>
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <span class="hero-pill"><i class="bi bi-mortarboard-fill"></i> {{ student.program }}</span>
-                        <span class="hero-pill"><i class="bi bi-person-badge-fill"></i> ID: {{ student.studentID }}</span>
-                        <span class="hero-pill"><i class="bi bi-stars"></i> Year {{ student.yearLevel }}</span>
+                    <h1 class="welcome-title">Welcome back, {{ user.name }}</h1>
+                    <div class="student-meta">
+                        <span><i class="bi bi-mortarboard text-primary"></i> <strong>{{ student.program }}</strong></span>
+                        <span><i class="bi bi-person-vcard"></i> {{ student.studentID }}</span>
+                        <span><i class="bi bi-bookmark"></i> Year {{ student.yearLevel }}</span>
                     </div>
                 </div>
             </div>
             <div class="col-lg-4 text-lg-end">
-                <span class="hero-pill hero-pill-gold">
-                    <i class="bi bi-calendar-event-fill"></i> {{ current_semester }}
-                </span>
+                <div class="term-box">
+                    <div class="term-box-label">Active Academic Term</div>
+                    <div class="term-box-value">{{ current_semester }}</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Color-Coded KPI Cards -->
+    <!-- Key Academic & Financial Overview -->
     <div class="row mb-4 g-3">
-        <div class="col-xl-3 col-sm-6 d-flex">
-            <div class="summary-card card-rose w-100">
-                <div class="kpi-icon-wrap"><i class="bi bi-cash-coin"></i></div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="summary-card stat-brick">
+                <div class="stat-top">
+                    <span class="stat-label">Current Fee Balance</span>
+                    <span class="stat-icon"><i class="bi bi-wallet2"></i></span>
+                </div>
                 <div>
-                    <div class="card-label">Current Fee Balance</div>
-                    <div class="card-value">₦{{ outstanding_balance|floatformat:0 }}</div>
+                    <div class="stat-value">₦{{ outstanding_balance|floatformat:0 }}</div>
+                    <div class="stat-sub">Tuition &amp; campus fees</div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 d-flex">
-            <div class="summary-card card-amber w-100">
-                <div class="kpi-icon-wrap"><i class="bi bi-calendar2-check-fill"></i></div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="summary-card stat-gold">
+                <div class="stat-top">
+                    <span class="stat-label">Next Payment Due</span>
+                    <span class="stat-icon"><i class="bi bi-calendar-event"></i></span>
+                </div>
                 <div>
-                    <div class="card-label">Next Payment Due</div>
-                    <div class="card-value" style="font-size:1.3rem;">{{ next_due_date|default:"No deadline set" }}</div>
+                    <div class="stat-value" style="font-size:1.25rem;">{{ next_due_date|default:"No deadline set" }}</div>
+                    <div class="stat-sub">Installment schedule</div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 d-flex">
-            <div class="summary-card card-emerald w-100">
-                <div class="kpi-icon-wrap"><i class="bi bi-book-half"></i></div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="summary-card stat-forest">
+                <div class="stat-top">
+                    <span class="stat-label">Credits Completed</span>
+                    <span class="stat-icon"><i class="bi bi-journal-check"></i></span>
+                </div>
                 <div>
-                    <div class="card-label">Credits Completed</div>
-                    <div class="card-value">{{ credits_completed }} <span style="font-size:1rem; color:#64748b; font-weight:600;">/ 120</span></div>
+                    <div class="stat-value">{{ credits_completed }} <span style="font-size:0.98rem; color:#6c7585; font-weight:500;">/ 120</span></div>
+                    <div class="stat-sub">{{ graduation_percentage }}% toward graduation</div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 d-flex">
-            <div class="summary-card card-violet w-100">
-                <div class="kpi-icon-wrap"><i class="bi bi-award-fill"></i></div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="summary-card stat-teal">
+                <div class="stat-top">
+                    <span class="stat-label">Cumulative GPA</span>
+                    <span class="stat-icon"><i class="bi bi-award"></i></span>
+                </div>
                 <div>
-                    <div class="card-label">Cumulative GPA</div>
-                    <div class="card-value">
+                    <div class="stat-value">
                         {% if live_gpa is not None %}
                             {{ live_gpa|floatformat:2 }}
                         {% else %}
-                            <span style="font-size:1rem; color:#94a3b8; font-weight:600;">Not yet earned</span>
+                            <span style="font-size:1rem; color:#7b8494; font-weight:500;">Not yet earned</span>
                         {% endif %}
                     </div>
+                    <div class="stat-sub">4.00 grading scale</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Campus Actions -->
+    <!-- Quick Campus Shortcuts -->
     <div class="row mb-4 g-3">
         <div class="col-md-3 col-6">
-            <a href="{% url 'course_catalog' %}" class="quick-action-tile qa-catalog">
-                <span class="qa-icon"><i class="bi bi-journal-bookmark-fill"></i></span>
-                <span>Course Catalog<br><small style="opacity:0.85; font-weight:500;">Browse AUN courses</small></span>
+            <a href="{% url 'course_catalog' %}" class="campus-link">
+                <span class="campus-link-icon icon-catalog"><i class="bi bi-book"></i></span>
+                <div>
+                    <div class="campus-link-title">Course Catalog</div>
+                    <div class="campus-link-desc">Browse 2022–2025 courses</div>
+                </div>
             </a>
         </div>
         <div class="col-md-3 col-6">
-            <a href="{% url 'course_registration' %}" class="quick-action-tile qa-register">
-                <span class="qa-icon"><i class="bi bi-pencil-square"></i></span>
-                <span>Register Courses<br><small style="opacity:0.85; font-weight:500;">Enroll for {{ current_semester }}</small></span>
+            <a href="{% url 'course_registration' %}" class="campus-link">
+                <span class="campus-link-icon icon-register"><i class="bi bi-pencil-square"></i></span>
+                <div>
+                    <div class="campus-link-title">Course Registration</div>
+                    <div class="campus-link-desc">Enroll for {{ current_semester }}</div>
+                </div>
             </a>
         </div>
         <div class="col-md-3 col-6">
-            <a href="{% url 'academic_progress' %}" class="quick-action-tile qa-progress">
-                <span class="qa-icon"><i class="bi bi-graph-up-arrow"></i></span>
-                <span>Academic Progress<br><small style="opacity:0.85; font-weight:500;">Transcript &amp; credits</small></span>
+            <a href="{% url 'academic_progress' %}" class="campus-link">
+                <span class="campus-link-icon icon-progress"><i class="bi bi-bar-chart-line"></i></span>
+                <div>
+                    <div class="campus-link-title">Academic Progress</div>
+                    <div class="campus-link-desc">Transcript &amp; credit audit</div>
+                </div>
             </a>
         </div>
         <div class="col-md-3 col-6">
-            <a href="{% url 'fee_calculator' %}" class="quick-action-tile qa-fees">
-                <span class="qa-icon"><i class="bi bi-calculator-fill"></i></span>
-                <span>Fee Calculator<br><small style="opacity:0.85; font-weight:500;">Estimate tuition</small></span>
+            <a href="{% url 'fee_calculator' %}" class="campus-link">
+                <span class="campus-link-icon icon-fees"><i class="bi bi-calculator"></i></span>
+                <div>
+                    <div class="campus-link-title">Fee Calculator</div>
+                    <div class="campus-link-desc">Estimate semester costs</div>
+                </div>
             </a>
         </div>
     </div>
 
     <!-- Graduation Progress -->
-    <div class="progress-section">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h5 class="mb-0" style="font-weight:800; color:#1e1b4b;">
-                <i class="bi bi-trophy-fill text-warning me-2"></i>Graduation Progress
-            </h5>
-            <span class="badge rounded-pill" style="background:#eef2ff; color:#4338ca; font-size:0.85rem; padding:0.45rem 0.9rem;">
-                {{ credits_completed }} / 120 Credits
-            </span>
+    <div class="panel-card">
+        <div class="panel-header">
+            <h5 class="panel-title"><i class="bi bi-mortarboard-fill" style="color:#1f6f54;"></i> Degree &amp; Graduation Progress</h5>
+            <span class="text-muted small fw-semibold">{{ credits_completed }} of 120 credits earned</span>
         </div>
-        <div class="progress-bar-custom">
-            <div class="progress-bar" role="progressbar" style="width: {{ graduation_percentage }}%;">
+        <div class="progress-track">
+            <div class="progress-fill" role="progressbar" style="width: {{ graduation_percentage }}%;">
                 {{ graduation_percentage }}% Complete
             </div>
         </div>
-        <div class="d-flex justify-content-between text-muted small mt-2 fw-semibold">
-            <span>Freshman (0)</span>
-            <span>Sophomore (30)</span>
-            <span>Junior (60)</span>
-            <span>Senior (90)</span>
-            <span>Graduation (120)</span>
+        <div class="d-flex justify-content-between text-muted small mt-2">
+            <span>Year 1 (0 cr)</span>
+            <span>Year 2 (30 cr)</span>
+            <span>Year 3 (60 cr)</span>
+            <span>Year 4 (90 cr)</span>
+            <span>Graduation (120 cr)</span>
         </div>
     </div>
 
-    <!-- Two-Column Main Content -->
+    <!-- Main Two-Column Section -->
     <div class="row g-4">
         <div class="col-lg-7">
-            <div class="table-section">
-                <div class="section-heading">
-                    <h5><span class="heading-dot dot-book"><i class="bi bi-lightbulb-fill"></i></span>Recommended Courses For You</h5>
-                    <a href="{% url 'course_catalog' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">View Catalog</a>
+            <div class="panel-card h-100 mb-0">
+                <div class="panel-header">
+                    <h5 class="panel-title"><i class="bi bi-journal-bookmark-fill" style="color:#1d6f8a;"></i> Recommended Courses</h5>
+                    <a href="{% url 'course_catalog' %}" class="btn btn-sm btn-outline-secondary">Open Catalog</a>
                 </div>
                 <div class="table-responsive">
                     <table class="table mb-0">
-                        <thead><tr><th>Course</th><th>Why It's Recommended</th><th>Term</th></tr></thead>
+                        <thead><tr><th>Course</th><th>Advising Note</th><th>Term</th></tr></thead>
                         <tbody>
                             {% for rec in recommendations %}
                             <tr>
-                                <td><span class="course-pill">{{ rec.course.courseID }}</span><strong>{{ rec.course.name }}</strong></td>
+                                <td><span class="course-code-tag">{{ rec.course.courseID }}</span><strong>{{ rec.course.name }}</strong></td>
                                 <td class="text-muted">{{ rec.reason }}</td>
-                                <td><span class="sem-pill">{{ rec.semester }}</span></td>
+                                <td><span class="term-tag">{{ rec.semester }}</span></td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="3" class="text-center text-muted py-4">No recommendations available.</td></tr>
+                            <tr><td colspan="3" class="text-center text-muted py-4">No course recommendations right now.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -425,14 +384,14 @@
         </div>
 
         <div class="col-lg-5">
-            <div class="table-section">
-                <div class="section-heading">
-                    <h5><span class="heading-dot dot-bell"><i class="bi bi-bell-fill"></i></span>Recent Notifications</h5>
+            <div class="panel-card h-100 mb-0">
+                <div class="panel-header">
+                    <h5 class="panel-title"><i class="bi bi-bell-fill" style="color:#d99b26;"></i> Campus Notices</h5>
                 </div>
                 <div class="table-responsive">
                     <table class="table mb-0">
                         <thead>
-                            <tr><th>Date</th><th>Message</th><th>Type</th></tr>
+                            <tr><th>Date</th><th>Notice</th><th>Status</th></tr>
                         </thead>
                         <tbody>
                             {% for notification in notifications %}
@@ -442,7 +401,7 @@
                                 <td><span class="badge-{{ notification.type }}">{{ notification.type|title }}</span></td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="3" class="text-center text-muted py-4">You're all caught up! No notifications.</td></tr>
+                            <tr><td colspan="3" class="text-center text-muted py-4">No new notices.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -452,10 +411,10 @@
     </div>
 
     <!-- Upcoming Payment Deadlines -->
-    <div class="table-section mt-2">
-        <div class="section-heading">
-            <h5><span class="heading-dot dot-wallet"><i class="bi bi-credit-card-2-front-fill"></i></span>Upcoming Payment Deadlines</h5>
-            <a href="{% url 'installment_plan' %}" class="btn btn-sm btn-outline-success rounded-pill px-3">Manage Plan</a>
+    <div class="panel-card mt-4">
+        <div class="panel-header">
+            <h5 class="panel-title"><i class="bi bi-receipt" style="color:#c2543d;"></i> Upcoming Payment Deadlines</h5>
+            <a href="{% url 'installment_plan' %}" class="btn btn-sm btn-outline-secondary">Installment Plans</a>
         </div>
         <div class="table-responsive">
             <table class="table mb-0">
@@ -466,7 +425,7 @@
                     {% for payment in upcoming_payments %}
                     <tr>
                         <td><strong>{{ payment.due_date }}</strong></td>
-                        <td class="fw-bold text-primary">₦{{ payment.amount|floatformat:0 }}</td>
+                        <td class="fw-bold">₦{{ payment.amount|floatformat:0 }}</td>
                         <td>
                             {% if payment.status == 'paid' %}<span class="badge-success">Paid</span>
                             {% elif payment.status == 'overdue' %}<span class="badge-danger">Overdue</span>
@@ -474,7 +433,7 @@
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="3" class="text-center text-muted py-4">No upcoming payment deadlines.</td></tr>
+                    <tr><td colspan="3" class="text-center text-muted py-4">No upcoming payment deadlines scheduled.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

@@ -1,4 +1,5 @@
 from datetime import date
+import re
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password, make_password
@@ -10,11 +11,12 @@ from django.db.models import Q
 from .models import (
     User, Student, Admin, AcademicAdvisor, Course, Enrollment,
     Fee, Payment, InstallmentPlan, AdvisorComment,
-    FeeStructure, FeeStructureChangeLog, AuditLog
+    FeeStructure, FeeStructureChangeLog, AuditLog, CreditOverloadRequest
 )
 from .services import (
     FeeCalculationEngine, validate_prerequisites,
-    get_eligible_courses, simulate_gpa, simulate_payment_penalty
+    get_eligible_courses, get_smart_registration_courses,
+    simulate_gpa, simulate_payment_penalty
 )
 from .audit import log_action
 from .notifications import check_and_create_fee_notifications, check_course_notifications
@@ -109,6 +111,8 @@ def signup_view(request):
             errors.append("Email is required.")
         if not student_id:
             errors.append("Student ID is required.")
+        elif not re.fullmatch(r'A\d{8}', student_id):
+            errors.append("Student ID must be in the format A00024499 (letter A followed by 8 digits).")
         if password1 != password2:
             errors.append("Passwords do not match.")
         if len(password1) < 8:
@@ -384,17 +388,46 @@ def course_registration(request):
     registered       = student.enrollments.filter(semester=CURRENT_SEMESTER).select_related('course')
     registered_ids   = set(e.course.courseID for e in registered)
     credits_registered = sum(e.course.credits for e in registered)
-    available        = Course.objects.exclude(courseID__in=registered_ids).prefetch_related('prerequisites__requiredCourse')
-    course_items     = get_eligible_courses(student, available)
-    prerequisite_errors = None
+
+    # Default maximum: 18 credits (or approved overload limit for this semester)
+    approved_overload = (
+        student.overload_requests
+        .filter(semester=CURRENT_SEMESTER, status='approved')
+        .order_by('-requested_credits')
+        .first()
+    )
+    latest_overload_request = (
+        student.overload_requests
+        .filter(semester=CURRENT_SEMESTER)
+        .order_by('-created_at')
+        .first()
+    )
+    max_credits = approved_overload.requested_credits if approved_overload else 18
+    credits_remaining = max(max_credits - credits_registered, 0)
 
     if request.method == 'POST':
-        selected_ids  = request.POST.getlist('course_ids')
+        selected_ids   = request.POST.getlist('course_ids')
         enrolled_count = 0
-        errors        = []
-        for course_id in selected_ids:
+        errors         = []
+
+        # Validate total credits before registering
+        selected_courses = list(
+            Course.objects.filter(courseID__in=selected_ids)
+            .exclude(courseID__in=registered_ids)
+            .prefetch_related('prerequisites__requiredCourse')
+        )
+        added_credits = sum(c.credits for c in selected_courses)
+        if credits_registered + added_credits > max_credits:
+            messages.error(
+                request,
+                f"Credit limit exceeded: selecting {added_credits} credit(s) would bring your total to "
+                f"{credits_registered + added_credits} credits (maximum allowed: {max_credits}). "
+                "Please submit a Credit Overload Request below if you need more than 18 credits."
+            )
+            return redirect('course_registration')
+
+        for course in selected_courses:
             try:
-                course = Course.objects.get(courseID=course_id)
                 validate_prerequisites(student, course)
                 Enrollment.objects.create(
                     student=student, course=course,
@@ -404,24 +437,109 @@ def course_registration(request):
             except ValidationError as e:
                 errors.append(str(e.message))
             except IntegrityError:
-                errors.append(f"{course_id} is already registered.")
+                errors.append(f"{course.courseID} is already registered.")
+
         if enrolled_count:
-            log_action(user, 'user_action',
-                f"Student {student.studentID} registered {enrolled_count} new course(s) for {CURRENT_SEMESTER}.", request)
+            log_action(
+                user, 'user_action',
+                f"Student {student.studentID} registered {enrolled_count} new course(s) for {CURRENT_SEMESTER}.",
+                request,
+            )
             messages.success(request, f"Successfully registered {enrolled_count} course(s).")
         if errors:
-            prerequisite_errors = ' | '.join(errors)
+            for err in errors:
+                messages.error(request, err)
         return redirect('course_registration')
 
+    # Smart recommendations (always computed from all unregistered courses)
+    base_available = (
+        Course.objects.exclude(courseID__in=registered_ids)
+        .prefetch_related('prerequisites__requiredCourse')
+    )
+    all_ranked = get_smart_registration_courses(student, base_available)
+    recommended_courses = [item for item in all_ranked if item['is_recommended']][:6]
+
+    # Search & filter across ALL available courses (including free electives)
+    search = request.GET.get('search', '').strip()
+    school = request.GET.get('school', '').strip()
+    dept   = request.GET.get('department', '').strip()
+
+    filtered_items = all_ranked
+    if school:
+        filtered_items = [i for i in filtered_items if i['course'].school == school]
+    if dept:
+        filtered_items = [i for i in filtered_items if i['course'].department == dept]
+    if search:
+        q_low = search.lower()
+        filtered_items = [
+            i for i in filtered_items
+            if q_low in i['course'].courseID.lower()
+            or q_low in i['course'].name.lower()
+            or q_low in i['course'].department.lower()
+            or q_low in (i['course'].description or '').lower()
+        ]
+
+    # Paginate 8 courses per page
+    paginator = Paginator(filtered_items, 8)
+    page_obj  = paginator.get_page(request.GET.get('page'))
+
+    departments = (
+        Course.objects.values_list('department', flat=True)
+        .distinct()
+        .order_by('department')
+    )
+
     return render(request, 'studenthq/course_registration.html', {
-        'user': user, 'student': student,
-        'available_courses':    course_items,
-        'registered_courses':   registered,
-        'registered_ids':       registered_ids,
-        'credits_registered':   credits_registered,
-        'current_semester':     CURRENT_SEMESTER,
-        'prerequisite_errors':  prerequisite_errors,
+        'user': user,
+        'student': student,
+        'available_courses': page_obj,
+        'total_available': len(filtered_items),
+        'recommended_courses': recommended_courses,
+        'registered_courses': registered,
+        'registered_ids': registered_ids,
+        'credits_registered': credits_registered,
+        'max_credits': max_credits,
+        'credits_remaining': credits_remaining,
+        'latest_overload_request': latest_overload_request,
+        'current_semester': CURRENT_SEMESTER,
+        'schools': Course.SCHOOL_CHOICES,
+        'departments': departments,
     })
+
+
+@role_required('student')
+def request_credit_overload(request):
+    if request.method == 'POST':
+        user    = get_logged_in_user(request)
+        student = get_object_or_404(Student, user=user)
+        reason  = request.POST.get('reason', '').strip()
+        try:
+            requested_credits = int(request.POST.get('requested_credits', 21))
+        except (ValueError, TypeError):
+            requested_credits = 21
+
+        if requested_credits < 19 or requested_credits > 24:
+            messages.error(request, "Overload request must be between 19 and 24 credit hours.")
+        elif not reason:
+            messages.error(request, "Please provide an academic justification for your credit overload request.")
+        else:
+            CreditOverloadRequest.objects.create(
+                student=student,
+                semester=CURRENT_SEMESTER,
+                requested_credits=requested_credits,
+                reason=reason,
+                status='pending',
+            )
+            log_action(
+                user, 'credit_overload_request',
+                f"Student {student.studentID} requested a credit overload of {requested_credits} credits for {CURRENT_SEMESTER}.",
+                request,
+            )
+            messages.success(
+                request,
+                f"Credit overload request for {requested_credits} credits submitted for advisor/registry review."
+            )
+    return redirect('course_registration')
 @role_required('student')
 def academic_progress(request):
     user     = get_logged_in_user(request)

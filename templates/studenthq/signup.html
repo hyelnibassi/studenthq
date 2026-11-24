@@ -38,8 +38,13 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Student ID</label>
-                <input type="text" name="student_id" class="form-control" placeholder="e.g. AUN-2026-001" value="{{ form_data.student_id|default:'' }}" required>
-                <small class="text-muted">As issued by the AUN Registry</small>
+                <input type="text" name="student_id" class="form-control"
+                    placeholder="e.g. A00024499"
+                    pattern="[Aa][0-9]{8}"
+                    maxlength="9"
+                    title="Enter your AUN Student ID in the format A00024499 (letter A followed by 8 digits)"
+                    value="{{ form_data.student_id|default:'' }}" required>
+                <small class="text-muted">Format: A followed by 8 digits (e.g. A00024499)</small>
             </div>
             <div class="mb-3">
                 <label class="form-label">University Email</label>

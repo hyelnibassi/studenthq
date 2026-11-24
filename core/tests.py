@@ -5,7 +5,7 @@ from django.urls import reverse
 from .models import (
     User, Student, Admin, AcademicAdvisor, Course, Prerequisite,
     Enrollment, Fee, Payment, InstallmentPlan, AdvisorComment,
-    FeeStructure, AuditLog
+    FeeStructure, AuditLog, CreditOverloadRequest
 )
 from .services import (
     FeeCalculationEngine, validate_prerequisites,
@@ -218,6 +218,33 @@ class AuthTests(TestCase):
         response = self.client.get(reverse('dashboard'))
         self.assertRedirects(response, reverse('login'))
 
+    def test_signup_student_id_format_validation(self):
+        # Invalid format should fail
+        bad = self.client.post(reverse('signup'), {
+            'name': 'New Student',
+            'student_id': 'AUN-2026-999',
+            'email': 'newstud@aun.edu.ng',
+            'program': 'Computer Science',
+            'year_level': '1',
+            'password1': 'securepass123',
+            'password2': 'securepass123',
+        })
+        self.assertEqual(bad.status_code, 200)
+        self.assertFalse(Student.objects.filter(studentID='AUN-2026-999').exists())
+
+        # Valid A00024499 format should succeed
+        good = self.client.post(reverse('signup'), {
+            'name': 'New Student',
+            'student_id': 'A00024499',
+            'email': 'newstud@aun.edu.ng',
+            'program': 'Computer Science',
+            'year_level': '1',
+            'password1': 'securepass123',
+            'password2': 'securepass123',
+        })
+        self.assertRedirects(good, reverse('login'))
+        self.assertTrue(Student.objects.filter(studentID='A00024499').exists())
+
 
 class AdvisorTests(TestCase):
 
@@ -401,3 +428,79 @@ class CatalogImportAndFilterTests(TestCase):
         resp = self.client.get(reverse('course_catalog') + '?school=SITC&search=CSC202')
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'CSC202')
+
+
+class CourseRegistrationSmartFeaturesTests(TestCase):
+
+    def setUp(self):
+        from django.contrib.auth.hashers import make_password
+        self.client = Client()
+        self.user = User.objects.create(
+            name='Reg Student', email='regstudent@aun.edu.ng',
+            passwordHash=make_password('studentpass123'), role='student'
+        )
+        self.student = Student.objects.create(
+            studentID='AUN-REG', user=self.user,
+            program='Computer Science', yearLevel=2, cumulativeGPA=3.6
+        )
+        # Create 10 courses: 1 completed CS, 2 eligible CS, 1 CS with unmet prereq, 6 free electives
+        self.cs101 = Course.objects.create(courseID='CS101', name='Intro to CS', credits=3, school='SITC', department='Computer Science', semesterOffered='Fall')
+        self.cs201 = Course.objects.create(courseID='CS201', name='Data Structures', credits=3, school='SITC', department='Computer Science', semesterOffered='Fall')
+        self.cs301 = Course.objects.create(courseID='CS301', name='Algorithms', credits=3, school='SITC', department='Computer Science', semesterOffered='Fall')
+        self.cs401 = Course.objects.create(courseID='CS401', name='Capstone', credits=3, school='SITC', department='Computer Science', semesterOffered='Spring')
+        Prerequisite.objects.create(course=self.cs201, requiredCourse=self.cs101)
+        Prerequisite.objects.create(course=self.cs401, requiredCourse=self.cs301)
+        Enrollment.objects.create(student=self.student, course=self.cs101, semester='Fall 2024', status='completed', grade='A')
+
+        for i in range(1, 8):
+            Course.objects.create(
+                courseID=f'ECO10{i}', name=f'Economics Elective {i}',
+                credits=3, school='SAS', department='Economics', semesterOffered='Fall'
+            )
+
+        self.client.post(reverse('login'), {'email': 'regstudent@aun.edu.ng', 'password': 'studentpass123'})
+
+    def test_pagination_8_per_page_and_smart_priority_order(self):
+        resp = self.client.get(reverse('course_registration'))
+        self.assertEqual(resp.status_code, 200)
+        page_obj = resp.context['available_courses']
+        self.assertEqual(len(page_obj.object_list), 8)
+        # First items must be uncompleted eligible CS courses (CS201, CS301) before CS401 (unmet prereq) and ECO electives
+        codes = [item['course'].courseID for item in page_obj.object_list]
+        self.assertEqual(codes[0], 'CS201')
+        self.assertEqual(codes[1], 'CS301')
+        self.assertIn('CS401', codes[:4])
+
+    def test_search_finds_free_electives_outside_program(self):
+        resp = self.client.get(reverse('course_registration') + '?search=ECO105')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'ECO105')
+        self.assertEqual(resp.context['total_available'], 1)
+
+    def test_credit_limit_18_enforced_and_overload_request(self):
+        # Try registering 7 courses (21 credits > 18 default max) -> blocked
+        resp = self.client.post(reverse('course_registration'), {
+            'course_ids': ['CS201', 'CS301', 'ECO101', 'ECO102', 'ECO103', 'ECO104', 'ECO105']
+        })
+        self.assertRedirects(resp, reverse('course_registration'))
+        self.assertEqual(Enrollment.objects.filter(student=self.student, semester=CURRENT_SEMESTER).count(), 0)
+
+        # Submit a credit overload request for 21 credits
+        ov_resp = self.client.post(reverse('request_credit_overload'), {
+            'requested_credits': '21',
+            'reason': 'Graduating on schedule with strong GPA.',
+        })
+        self.assertRedirects(ov_resp, reverse('course_registration'))
+        req = CreditOverloadRequest.objects.filter(student=self.student, semester=CURRENT_SEMESTER).first()
+        self.assertIsNotNone(req)
+        self.assertEqual(req.requested_credits, 21)
+        self.assertEqual(req.status, 'pending')
+
+        # Once approved, student can register up to 21 credits
+        req.status = 'approved'
+        req.save()
+        resp2 = self.client.post(reverse('course_registration'), {
+            'course_ids': ['CS201', 'CS301', 'ECO101', 'ECO102', 'ECO103', 'ECO104', 'ECO105']
+        })
+        self.assertRedirects(resp2, reverse('course_registration'))
+        self.assertEqual(Enrollment.objects.filter(student=self.student, semester=CURRENT_SEMESTER).count(), 7)

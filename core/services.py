@@ -93,10 +93,36 @@ def validate_prerequisites(student, course):
     return True
 
 
+PROGRAM_DEPARTMENT_MAP = {
+    'Computer Science': {
+        'primary': {'Computer Science'},
+        'related': {'Software Engineering', 'Data Science', 'Information Systems'},
+    },
+    'Business Administration': {
+        'primary': {'Business Administration'},
+        'related': {'Economics'},
+    },
+    'Economics': {
+        'primary': {'Economics'},
+        'related': {'Business Administration'},
+    },
+    'Engineering': {
+        'primary': {
+            'Engineering',
+            'Electrical & Electronics Engineering',
+            'Chemical Engineering',
+            'Civil Engineering',
+            'Telecommunications Engineering',
+        },
+        'related': {'Computer Science', 'Petroleum Chemistry'},
+    },
+}
+
+
 def get_eligible_courses(student, available_courses):
     """
     Returns list of dicts: {course, eligible (bool), missing_prereqs (str)}.
-    Used to build the course registration page.
+    Uses prefetched prerequisites to avoid N+1 queries.
     """
     completed_ids = set(
         student.enrollments
@@ -106,7 +132,7 @@ def get_eligible_courses(student, available_courses):
 
     result = []
     for course in available_courses:
-        required = course.prerequisites.select_related('requiredCourse').all()
+        required = course.prerequisites.all()
         missing = [p.requiredCourse.courseID for p in required if p.requiredCourse.courseID not in completed_ids]
         result.append({
             'course': course,
@@ -114,6 +140,69 @@ def get_eligible_courses(student, available_courses):
             'missing_prereqs': ', '.join(missing) if missing else '',
         })
     return result
+
+
+def get_smart_registration_courses(student, available_courses):
+    """
+    Ranks courses for Course Registration in priority order:
+      1. Belongs to the student's degree catalog / program of study
+      2. Not yet completed by the student (highest priority)
+      3. Prerequisites already satisfied
+    Also preserves free electives and other courses so students can search & select them.
+    """
+    completed_ids = set(
+        student.enrollments
+        .filter(status='completed')
+        .values_list('course__courseID', flat=True)
+    )
+    prog_info = PROGRAM_DEPARTMENT_MAP.get(student.program, {'primary': {student.program}, 'related': set()})
+    primary_depts = prog_info['primary']
+    related_depts = prog_info['related']
+
+    items = []
+    for course in available_courses:
+        required = course.prerequisites.all()
+        missing = [p.requiredCourse.courseID for p in required if p.requiredCourse.courseID not in completed_ids]
+        eligible = len(missing) == 0
+        is_completed = course.courseID in completed_ids
+        is_primary_program = course.department in primary_depts
+        is_related_program = course.department in related_depts
+        in_program = is_primary_program or is_related_program
+
+        # Priority tuple (lower sorts first):
+        # (not in primary/related program, is already completed, not eligible, not primary exact dept, courseID)
+        rank = (
+            0 if is_primary_program else (1 if is_related_program else 2),
+            1 if is_completed else 0,
+            0 if eligible else 1,
+            course.courseID,
+        )
+
+        if is_primary_program and not is_completed and eligible:
+            tag = 'Program Core'
+        elif is_related_program and not is_completed and eligible:
+            tag = 'School Elective'
+        elif in_program and not is_completed:
+            tag = 'Program (Prereq Needed)'
+        elif is_completed:
+            tag = 'Completed'
+        else:
+            tag = 'Free Elective'
+
+        items.append({
+            'course': course,
+            'eligible': eligible,
+            'missing_prereqs': ', '.join(missing) if missing else '',
+            'in_program': in_program,
+            'is_primary_program': is_primary_program,
+            'is_completed': is_completed,
+            'is_recommended': in_program and (not is_completed) and eligible,
+            'tag': tag,
+            '_rank': rank,
+        })
+
+    items.sort(key=lambda x: x['_rank'])
+    return items
 GRADE_POINT_MAP = {
     'A': 4.0, 'B+': 3.5, 'B': 3.0,
     'C+': 2.5, 'C': 2.0, 'D+': 1.5,

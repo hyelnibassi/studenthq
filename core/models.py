@@ -303,6 +303,27 @@ class Notification(models.Model):
         db_table = 'notification'
 
 
+class CreditOverloadRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending',  'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    requestID         = models.AutoField(primary_key=True)
+    student           = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='overload_requests')
+    semester          = models.CharField(max_length=30)
+    requested_credits = models.IntegerField()
+    reason            = models.TextField()
+    status            = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at        = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'credit_overload_request'
+
+    def __str__(self):
+        return f"Overload #{self.requestID} — {self.student.studentID} ({self.requested_credits} cr, {self.status})"
+
+
 class AuditLog(models.Model):
     ACTION_CHOICES = [
         ('fee_structure_update', 'Fee Structure Update'),
@@ -314,6 +335,7 @@ class AuditLog(models.Model):
         ('deferral_rejected', 'Deferral Rejected'),
         ('installment_plan_request', 'Installment Plan Requested'),
         ('deferral_request', 'Deferral Requested'),
+        ('credit_overload_request', 'Credit Overload Requested'),
         ('advisor_comment', 'Advisor Comment Added'),
         ('user_login', 'User Login'),
         ('user_signup', 'User Signup'),

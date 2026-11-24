@@ -22,8 +22,9 @@ urlpatterns = [
     path('fees/penalty-simulator/',    views.payment_simulator,       name='payment_simulator'),
 
     # Courses
-    path('courses/catalog/',   views.course_catalog,      name='course_catalog'),
-    path('courses/register/',  views.course_registration, name='course_registration'),
+    path('courses/catalog/',           views.course_catalog,          name='course_catalog'),
+    path('courses/register/',          views.course_registration,     name='course_registration'),
+    path('courses/register/overload/', views.request_credit_overload, name='request_credit_overload'),
 
     # Academic
     path('academic/progress/',      views.academic_progress, name='academic_progress'),

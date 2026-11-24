@@ -1,0 +1,123 @@
+{% extends 'studenthq/base.html' %}
+{% block title %}Fee Structure Management - Student HQ Admin{% endblock %}
+{% block extra_css %}
+<style>
+    .page-header { background: linear-gradient(135deg, #001a4d 0%, #003d82 100%); color: white; padding: 2.5rem 0; margin-bottom: 3rem; }
+    .page-header h1 { font-weight: 700; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+    .form-card { background: white; border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 3rem; }
+    .card-header-custom { background-color: #001a4d; color: white; padding: 1.5rem; border-radius: 12px 12px 0 0; border-bottom: 3px solid #d4a574; }
+    .card-header-custom h5 { margin: 0; font-weight: 600; }
+    .form-label { font-weight: 600; color: #2c3e50; margin-bottom: 0.6rem; font-size: 0.95rem; }
+    .form-control { border: 1px solid #e0e0e0; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.95rem; }
+    .form-control:focus { border-color: #001a4d; box-shadow: 0 0 0 0.2rem rgba(0,26,77,0.15); }
+    .form-control:disabled { background-color: #f5f5f5; color: #6c757d; }
+    .btn-save { background-color: #001a4d; border-color: #001a4d; color: white; font-weight: 600; padding: 0.75rem 2rem; border-radius: 8px; }
+    .btn-save:hover { background-color: #003d82; color: white; }
+    .form-text-warning { font-size: 0.85rem; color: #d4a574; margin-top: 0.3rem; font-weight: 500; }
+    .history-section { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .history-title { font-weight: 700; color: #2c3e50; margin-bottom: 1.5rem; font-size: 1.2rem; display: flex; align-items: center; }
+    .history-title::before { content: ''; display: inline-block; width: 4px; height: 1.2rem; background-color: #d4a574; border-radius: 2px; margin-right: 0.8rem; }
+    .table thead th { background-color: #001a4d; color: white; font-weight: 600; border: none; padding: 1rem; text-transform: uppercase; font-size: 0.85rem; }
+    .table tbody td { padding: 1rem; border-bottom: 1px solid #e0e0e0; vertical-align: middle; }
+    .currency { font-weight: 600; color: #001a4d; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container-fluid px-4">
+        <h1>Fee Structure Management</h1>
+        <p style="opacity:0.95; margin-bottom:0; font-size:0.95rem;">Update and manage tuition fees, accommodation charges, and other student fees for AUN</p>
+    </div>
+</div>
+<div class="container-fluid px-4">
+    <div class="form-card">
+        <div class="card-header-custom"><h5>✎ Update Fee Structure</h5></div>
+        <div class="p-4">
+            <form method="POST" action="{% url 'admin_fee_structure' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label class="form-label">Tuition Per Credit Hour</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₦</span>
+                                <input type="number" class="form-control" name="tuition_per_credit" value="{{ fee_structure.tuition_per_credit|default:50000 }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">On-Campus Accommodation Fee (per semester)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₦</span>
+                                <input type="number" class="form-control" name="accommodation_on_campus" value="{{ fee_structure.accommodation_on_campus|default:250000 }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Off-Campus Allowance (per semester)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₦</span>
+                                <input type="number" class="form-control" name="accommodation_off_campus" value="{{ fee_structure.accommodation_off_campus|default:180000 }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label class="form-label">Sports Fee</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₦</span>
+                                <input type="number" class="form-control" name="sports_fee" value="{{ fee_structure.sports_fee|default:15000 }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Lab Fee</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₦</span>
+                                <input type="number" class="form-control" name="lab_fee" value="{{ fee_structure.lab_fee|default:25000 }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Library Fee</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₦</span>
+                                <input type="number" class="form-control" name="library_fee" value="{{ fee_structure.library_fee|default:20000 }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Late Payment Penalty Per Month</label>
+                    <div class="input-group">
+                        <span class="input-group-text">₦</span>
+                        <input type="number" class="form-control" value="30000" disabled>
+                    </div>
+                    <div class="form-text-warning">⚠ This is fixed by AUN institutional policy and cannot be changed here</div>
+                </div>
+                <div class="d-flex gap-3 mt-4">
+                    <button type="submit" class="btn btn-save">💾 Save Changes</button>
+                    <a href="{% url 'admin_fee_structure' %}" class="btn btn-outline-secondary">↻ Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="history-section">
+        <h5 class="history-title">Change History</h5>
+        <div class="table-responsive">
+            <table class="table">
+                <thead><tr><th>Date Changed</th><th>Field</th><th>Old Value</th><th>New Value</th><th>Changed By</th></tr></thead>
+                <tbody>
+                    {% for log in change_history %}
+                    <tr>
+                        <td>{{ log.changed_at }}</td>
+                        <td>{{ log.field_name }}</td>
+                        <td><span class="currency">₦{{ log.old_value|floatformat:0 }}</span></td>
+                        <td><span class="currency">₦{{ log.new_value|floatformat:0 }}</span></td>
+                        <td>{{ log.changed_by.name }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted py-4">No changes recorded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

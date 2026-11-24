@@ -1,0 +1,443 @@
+{% extends 'studenthq/base.html' %}
+{% block title %}Dashboard - Student HQ | AUN{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block extra_css %}
+<style>
+    /* Grounded Collegiate Student Header */
+    .student-banner {
+        background-color: #ffffff;
+        border: 1px solid #e5e1d8;
+        border-top: 5px solid #14284b;
+        border-radius: 10px;
+        padding: 1.75rem 2rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 2px 6px rgba(20, 40, 75, 0.05);
+    }
+    .student-initials {
+        width: 56px;
+        height: 56px;
+        border-radius: 10px;
+        background-color: #14284b;
+        color: #f3c969;
+        font-family: 'Source Serif 4', Georgia, serif;
+        font-size: 1.55rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .welcome-title {
+        font-family: 'Source Serif 4', Georgia, serif;
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: #14284b;
+        margin-bottom: 0.25rem;
+    }
+    .student-meta {
+        color: #5c6675;
+        font-size: 0.95rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.25rem;
+        align-items: center;
+    }
+    .student-meta span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .term-box {
+        background-color: #fdf8ec;
+        border: 1px solid #ecd9a8;
+        border-left: 4px solid #d99b26;
+        border-radius: 8px;
+        padding: 0.7rem 1.1rem;
+        display: inline-block;
+        text-align: left;
+    }
+    .term-box-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.6px; color: #8c6212; font-weight: 700; }
+    .term-box-value { font-size: 1.05rem; font-weight: 700; color: #14284b; }
+
+    /* Warm Color-Coded Stat Cards */
+    .summary-card {
+        background: #ffffff;
+        border: 1px solid #e5e1d8;
+        border-radius: 10px;
+        padding: 1.35rem 1.4rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-left: 5px solid #14284b;
+        box-shadow: 0 1px 4px rgba(20, 40, 75, 0.04);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .summary-card:hover { box-shadow: 0 6px 16px rgba(20, 40, 75, 0.09); }
+    .stat-brick  { border-left-color: #c2543d; }
+    .stat-gold   { border-left-color: #d99b26; }
+    .stat-forest { border-left-color: #1f6f54; }
+    .stat-teal   { border-left-color: #1d6f8a; }
+
+    .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; }
+    .stat-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.45px; color: #5c6675; }
+    .stat-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+    .stat-brick .stat-icon  { background-color: #fbeee9; color: #b5452e; }
+    .stat-gold .stat-icon   { background-color: #fdf6e3; color: #b87e14; }
+    .stat-forest .stat-icon { background-color: #eaf5f0; color: #1f6f54; }
+    .stat-teal .stat-icon   { background-color: #e8f4f8; color: #1d6f8a; }
+
+    .stat-value { font-size: 1.65rem; font-weight: 700; color: #14284b; line-height: 1.2; }
+    .stat-brick .stat-value  { color: #a63d28; }
+    .stat-forest .stat-value { color: #175943; }
+    .stat-sub { font-size: 0.82rem; color: #6c7585; margin-top: 0.35rem; }
+
+    /* Tactile Campus Shortcut Links */
+    .campus-link {
+        background: #ffffff;
+        border: 1px solid #e5e1d8;
+        border-radius: 10px;
+        padding: 0.95rem 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        text-decoration: none;
+        color: #1c2430;
+        height: 100%;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .campus-link:hover { background-color: #fbfaf7; border-color: #14284b; color: #14284b; }
+    .campus-link-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        color: #fff;
+    }
+    .icon-catalog  { background-color: #1d6f8a; }
+    .icon-register { background-color: #14284b; }
+    .icon-progress { background-color: #1f6f54; }
+    .icon-fees     { background-color: #c2543d; }
+    .campus-link-title { font-weight: 700; font-size: 0.93rem; line-height: 1.25; }
+    .campus-link-desc  { font-size: 0.8rem; color: #6c7585; }
+
+    /* Degree Progress Panel */
+    .panel-card {
+        background: #ffffff;
+        border: 1px solid #e5e1d8;
+        border-radius: 10px;
+        padding: 1.5rem 1.75rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 1px 4px rgba(20, 40, 75, 0.04);
+    }
+    .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 0.85rem;
+        margin-bottom: 1.15rem;
+        border-bottom: 1px solid #ece8df;
+    }
+    .panel-title {
+        font-family: 'Source Serif 4', Georgia, serif;
+        font-size: 1.18rem;
+        font-weight: 700;
+        color: #14284b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+    }
+    .progress-track {
+        height: 22px;
+        background-color: #edeae2;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .progress-fill {
+        background-color: #1f6f54;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.8rem;
+        min-width: 72px;
+    }
+
+    /* Tables */
+    .table thead { background-color: #f6f4ef; }
+    .table thead th {
+        color: #465061;
+        font-weight: 700;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 0.75rem 0.85rem;
+        border-bottom: 2px solid #e5e1d8;
+    }
+    .table tbody td { padding: 0.85rem; vertical-align: middle; font-size: 0.92rem; border-color: #f0ede6; }
+    .table tbody tr:hover { background-color: #faf9f5; }
+
+    .course-code-tag {
+        display: inline-block;
+        background-color: #e8f4f8;
+        color: #155369;
+        font-weight: 700;
+        padding: 0.2rem 0.55rem;
+        border-radius: 5px;
+        font-size: 0.82rem;
+        margin-right: 0.4rem;
+    }
+    .term-tag {
+        display: inline-block;
+        background-color: #f4f1ea;
+        color: #465061;
+        font-weight: 600;
+        padding: 0.2rem 0.55rem;
+        border-radius: 5px;
+        font-size: 0.8rem;
+    }
+    .badge-success { background-color: #e3f4ec; color: #175943; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; }
+    .badge-warning { background-color: #fdf3d8; color: #8c6212; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; }
+    .badge-danger  { background-color: #fbe9e6; color: #a63d28; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; }
+    .badge-info    { background-color: #e8f4f8; color: #155369; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Collegiate Student Header -->
+    <div class="student-banner">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8 d-flex align-items-center gap-3">
+                <div class="student-initials">{{ user.name|first|upper }}</div>
+                <div>
+                    <h1 class="welcome-title">Welcome back, {{ user.name }}</h1>
+                    <div class="student-meta">
+                        <span><i class="bi bi-mortarboard text-primary"></i> <strong>{{ student.program }}</strong></span>
+                        <span><i class="bi bi-person-vcard"></i> {{ student.studentID }}</span>
+                        <span><i class="bi bi-bookmark"></i> Year {{ student.yearLevel }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="term-box">
+                    <div class="term-box-label">Active Academic Term</div>
+                    <div class="term-box-value">{{ current_semester }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Academic & Financial Overview -->
+    <div class="row mb-4 g-3">
+        <div class="col-xl-3 col-sm-6">
+            <div class="summary-card stat-brick">
+                <div class="stat-top">
+                    <span class="stat-label">Current Fee Balance</span>
+                    <span class="stat-icon"><i class="bi bi-wallet2"></i></span>
+                </div>
+                <div>
+                    <div class="stat-value">₦{{ outstanding_balance|floatformat:0 }}</div>
+                    <div class="stat-sub">Tuition &amp; campus fees</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="summary-card stat-gold">
+                <div class="stat-top">
+                    <span class="stat-label">Next Payment Due</span>
+                    <span class="stat-icon"><i class="bi bi-calendar-event"></i></span>
+                </div>
+                <div>
+                    <div class="stat-value" style="font-size:1.25rem;">{{ next_due_date|default:"No deadline set" }}</div>
+                    <div class="stat-sub">Installment schedule</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="summary-card stat-forest">
+                <div class="stat-top">
+                    <span class="stat-label">Credits Completed</span>
+                    <span class="stat-icon"><i class="bi bi-journal-check"></i></span>
+                </div>
+                <div>
+                    <div class="stat-value">{{ credits_completed }} <span style="font-size:0.98rem; color:#6c7585; font-weight:500;">/ 120</span></div>
+                    <div class="stat-sub">{{ graduation_percentage }}% toward graduation</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="summary-card stat-teal">
+                <div class="stat-top">
+                    <span class="stat-label">Cumulative GPA</span>
+                    <span class="stat-icon"><i class="bi bi-award"></i></span>
+                </div>
+                <div>
+                    <div class="stat-value">
+                        {% if live_gpa is not None %}
+                            {{ live_gpa|floatformat:2 }}
+                        {% else %}
+                            <span style="font-size:1rem; color:#7b8494; font-weight:500;">Not yet earned</span>
+                        {% endif %}
+                    </div>
+                    <div class="stat-sub">4.00 grading scale</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Campus Shortcuts -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-3 col-6">
+            <a href="{% url 'course_catalog' %}" class="campus-link">
+                <span class="campus-link-icon icon-catalog"><i class="bi bi-book"></i></span>
+                <div>
+                    <div class="campus-link-title">Course Catalog</div>
+                    <div class="campus-link-desc">Browse 2022–2025 courses</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-6">
+            <a href="{% url 'course_registration' %}" class="campus-link">
+                <span class="campus-link-icon icon-register"><i class="bi bi-pencil-square"></i></span>
+                <div>
+                    <div class="campus-link-title">Course Registration</div>
+                    <div class="campus-link-desc">Enroll for {{ current_semester }}</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-6">
+            <a href="{% url 'academic_progress' %}" class="campus-link">
+                <span class="campus-link-icon icon-progress"><i class="bi bi-bar-chart-line"></i></span>
+                <div>
+                    <div class="campus-link-title">Academic Progress</div>
+                    <div class="campus-link-desc">Transcript &amp; credit audit</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-6">
+            <a href="{% url 'fee_calculator' %}" class="campus-link">
+                <span class="campus-link-icon icon-fees"><i class="bi bi-calculator"></i></span>
+                <div>
+                    <div class="campus-link-title">Fee Calculator</div>
+                    <div class="campus-link-desc">Estimate semester costs</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Graduation Progress -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h5 class="panel-title"><i class="bi bi-mortarboard-fill" style="color:#1f6f54;"></i> Degree &amp; Graduation Progress</h5>
+            <span class="text-muted small fw-semibold">{{ credits_completed }} of 120 credits earned</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" role="progressbar" style="width: {{ graduation_percentage }}%;">
+                {{ graduation_percentage }}% Complete
+            </div>
+        </div>
+        <div class="d-flex justify-content-between text-muted small mt-2">
+            <span>Year 1 (0 cr)</span>
+            <span>Year 2 (30 cr)</span>
+            <span>Year 3 (60 cr)</span>
+            <span>Year 4 (90 cr)</span>
+            <span>Graduation (120 cr)</span>
+        </div>
+    </div>
+
+    <!-- Main Two-Column Section -->
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="panel-card h-100 mb-0">
+                <div class="panel-header">
+                    <h5 class="panel-title"><i class="bi bi-journal-bookmark-fill" style="color:#1d6f8a;"></i> Recommended Courses</h5>
+                    <a href="{% url 'course_catalog' %}" class="btn btn-sm btn-outline-secondary">Open Catalog</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead><tr><th>Course</th><th>Advising Note</th><th>Term</th></tr></thead>
+                        <tbody>
+                            {% for rec in recommendations %}
+                            <tr>
+                                <td><span class="course-code-tag">{{ rec.course.courseID }}</span><strong>{{ rec.course.name }}</strong></td>
+                                <td class="text-muted">{{ rec.reason }}</td>
+                                <td><span class="term-tag">{{ rec.semester }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center text-muted py-4">No course recommendations right now.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="panel-card h-100 mb-0">
+                <div class="panel-header">
+                    <h5 class="panel-title"><i class="bi bi-bell-fill" style="color:#d99b26;"></i> Campus Notices</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr><th>Date</th><th>Notice</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for notification in notifications %}
+                            <tr>
+                                <td class="text-nowrap text-muted small">{{ notification.date }}</td>
+                                <td>{{ notification.message }}</td>
+                                <td><span class="badge-{{ notification.type }}">{{ notification.type|title }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center text-muted py-4">No new notices.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Payment Deadlines -->
+    <div class="panel-card mt-4">
+        <div class="panel-header">
+            <h5 class="panel-title"><i class="bi bi-receipt" style="color:#c2543d;"></i> Upcoming Payment Deadlines</h5>
+            <a href="{% url 'installment_plan' %}" class="btn btn-sm btn-outline-secondary">Installment Plans</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr><th>Due Date</th><th>Amount (₦)</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    {% for payment in upcoming_payments %}
+                    <tr>
+                        <td><strong>{{ payment.due_date }}</strong></td>
+                        <td class="fw-bold">₦{{ payment.amount|floatformat:0 }}</td>
+                        <td>
+                            {% if payment.status == 'paid' %}<span class="badge-success">Paid</span>
+                            {% elif payment.status == 'overdue' %}<span class="badge-danger">Overdue</span>
+                            {% else %}<span class="badge-warning">Pending</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted py-4">No upcoming payment deadlines scheduled.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

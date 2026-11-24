@@ -1,0 +1,496 @@
+{% extends 'studenthq/base.html' %}
+{% block title %}Course Registration - Student HQ | AUN{% endblock %}
+{% block nav_registration %}active{% endblock %}
+{% block extra_css %}
+<style>
+    .page-header {
+        background-color: #14284b;
+        color: white;
+        padding: 2.1rem 0;
+        margin-bottom: 1.75rem;
+        border-bottom: 4px solid #d99b26;
+    }
+    .page-title {
+        font-family: 'Source Serif 4', Georgia, serif;
+        font-size: 2.1rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 1.15rem;
+        margin-bottom: 1.75rem;
+    }
+    .summary-card {
+        background: #ffffff;
+        border: 1px solid #e5e1d8;
+        border-left: 5px solid #14284b;
+        border-radius: 10px;
+        padding: 1.25rem 1.35rem;
+        box-shadow: 0 1px 4px rgba(20, 40, 75, 0.04);
+    }
+    .summary-card.card-forest { border-left-color: #1f6f54; }
+    .summary-card.card-gold   { border-left-color: #d99b26; }
+    .summary-card.card-brick  { border-left-color: #c2543d; }
+    .summary-label {
+        font-size: 0.78rem;
+        color: #5c6675;
+        text-transform: uppercase;
+        letter-spacing: 0.45px;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+    .summary-value { font-size: 1.75rem; font-weight: 700; color: #14284b; line-height: 1.2; }
+    .summary-sub { font-size: 0.82rem; color: #6c7585; margin-top: 0.25rem; }
+
+    .panel-card {
+        background: #ffffff;
+        border: 1px solid #e5e1d8;
+        border-radius: 10px;
+        padding: 1.4rem 1.5rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 1px 4px rgba(20, 40, 75, 0.04);
+    }
+    .panel-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding-bottom: 0.85rem;
+        margin-bottom: 1.1rem;
+        border-bottom: 1px solid #ece8df;
+    }
+    .section-title {
+        font-family: 'Source Serif 4', Georgia, serif;
+        font-size: 1.22rem;
+        font-weight: 700;
+        color: #14284b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .rec-card {
+        background-color: #faf9f5;
+        border: 1px solid #e5e1d8;
+        border-left: 4px solid #1f6f54;
+        border-radius: 8px;
+        padding: 0.9rem 1rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .rec-code { font-weight: 700; color: #14284b; font-size: 0.95rem; }
+    .rec-name { font-size: 0.9rem; color: #2d3748; font-weight: 500; }
+
+    .filter-bar {
+        background-color: #faf9f5;
+        border: 1px solid #e5e1d8;
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        margin-bottom: 1.25rem;
+    }
+    .filter-bar label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #14284b;
+        margin-bottom: 0.3rem;
+    }
+
+    .table thead { background-color: #14284b; color: white; }
+    .table th { font-weight: 600; text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.4px; padding: 0.85rem; border: none; }
+    .table td { padding: 0.85rem; vertical-align: middle; font-size: 0.92rem; border-color: #f0ede6; }
+    .table tbody tr:hover { background-color: #faf9f5; }
+
+    .tag-program  { background-color: #e3f4ec; color: #175943; padding: 0.22rem 0.55rem; border-radius: 5px; font-size: 0.76rem; font-weight: 700; }
+    .tag-school   { background-color: #e8f4f8; color: #155369; padding: 0.22rem 0.55rem; border-radius: 5px; font-size: 0.76rem; font-weight: 700; }
+    .tag-elective { background-color: #f4f1ea; color: #5c6675; padding: 0.22rem 0.55rem; border-radius: 5px; font-size: 0.76rem; font-weight: 600; }
+    .badge-eligible { background-color: #e3f4ec; color: #175943; padding: 0.28rem 0.65rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; }
+    .badge-missing  { background-color: #fbe9e6; color: #a63d28; padding: 0.28rem 0.65rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; }
+    .credit-pill    { background-color: #e8f4f8; color: #155369; padding: 0.24rem 0.6rem; border-radius: 5px; font-weight: 700; font-size: 0.82rem; }
+
+    .btn-register {
+        background-color: #14284b;
+        border-color: #14284b;
+        color: white;
+        font-weight: 600;
+        padding: 0.65rem 1.65rem;
+        border-radius: 7px;
+    }
+    .btn-register:hover { background-color: #1d6f8a; border-color: #1d6f8a; color: white; }
+    .btn-overload {
+        background-color: #fdf8ec;
+        border: 1px solid #d99b26;
+        color: #8c6212;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 6px;
+    }
+    .btn-overload:hover { background-color: #d99b26; color: #ffffff; }
+    .overload-alert {
+        background-color: #fdf8ec;
+        border: 1px solid #ecd9a8;
+        border-left: 4px solid #d99b26;
+        border-radius: 8px;
+        padding: 0.85rem 1.1rem;
+        margin-bottom: 1.25rem;
+        font-size: 0.9rem;
+    }
+    .empty-state { text-align: center; padding: 2.25rem 1rem; color: #6c7585; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container-fluid px-4">
+        <h1 class="page-title">Course Registration</h1>
+        <p class="mb-0" style="opacity:0.88;">{{ current_semester }} &middot; {{ student.program }} &middot; American University of Nigeria</p>
+    </div>
+</div>
+
+<main class="container-fluid px-4 mb-5">
+    <!-- Credit Summary & Overload Strip -->
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-label">Credits Registered</div>
+            <div class="summary-value">{{ credits_registered }}</div>
+            <div class="summary-sub">For {{ current_semester }}</div>
+        </div>
+        <div class="summary-card card-gold">
+            <div class="summary-label">Maximum Allowed Credits</div>
+            <div class="summary-value">{{ max_credits }}</div>
+            <div class="summary-sub">
+                {% if max_credits > 18 %}Approved overload limit{% else %}Standard semester cap{% endif %}
+            </div>
+        </div>
+        <div class="summary-card card-forest">
+            <div class="summary-label">Credits Remaining</div>
+            <div class="summary-value">{{ credits_remaining }}</div>
+            <div class="summary-sub">Available to add now</div>
+        </div>
+        <div class="summary-card card-brick d-flex flex-column justify-content-between">
+            <div>
+                <div class="summary-label">Need More Than 18 Credits?</div>
+                <div class="summary-sub mb-2">
+                    {% if latest_overload_request %}
+                        Status: <strong>{{ latest_overload_request.status|title }}</strong> ({{ latest_overload_request.requested_credits }} cr requested)
+                    {% else %}
+                        Submit an advisor-reviewed credit overload request (up to 24 credits).
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <button type="button" class="btn btn-overload w-100" data-bs-toggle="modal" data-bs-target="#overloadModal">
+                    <i class="bi bi-plus-circle me-1"></i> Request Credit Overload
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% if latest_overload_request %}
+    <div class="overload-alert d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <strong>Credit Overload Request ({{ current_semester }}):</strong>
+            Requested <strong>{{ latest_overload_request.requested_credits }} credit hours</strong> &mdash;
+            Status: <span class="badge {% if latest_overload_request.status == 'approved' %}bg-success{% elif latest_overload_request.status == 'rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ latest_overload_request.status|title }}</span>
+        </div>
+        <small class="text-muted">Submitted {{ latest_overload_request.created_at|date:"M d, Y" }}</small>
+    </div>
+    {% endif %}
+
+    <!-- Smart Recommended Courses for Student's Program -->
+    {% if recommended_courses %}
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2 class="section-title">
+                <i class="bi bi-stars" style="color:#d99b26;"></i>
+                Recommended for {{ student.program }}
+            </h2>
+            <span class="text-muted small">Prioritized by: 1) Your Program &rarr; 2) Not Yet Completed &rarr; 3) Prerequisites Met</span>
+        </div>
+        <form method="POST" action="{% url 'course_registration' %}">
+            {% csrf_token %}
+            <div class="row g-3">
+                {% for item in recommended_courses %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="rec-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="form-check">
+                                <input class="form-check-input course-checkbox" type="checkbox"
+                                    name="course_ids" value="{{ item.course.courseID }}"
+                                    data-credits="{{ item.course.credits }}"
+                                    id="rec-{{ item.course.courseID }}">
+                                <label class="form-check-label" for="rec-{{ item.course.courseID }}">
+                                    <span class="rec-code">{{ item.course.courseID }}</span>
+                                    <div class="rec-name">{{ item.course.name }}</div>
+                                </label>
+                            </div>
+                            <span class="credit-pill">{{ item.course.credits }} cr</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <span class="tag-program">{{ item.tag }}</span>
+                            <span class="badge-eligible">&#10003; Prereqs Met</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="mt-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <small class="text-muted">Select any recommended courses above or search all courses (including free electives) below.</small>
+                <button type="submit" class="btn btn-register btn-sm">Register Selected Recommendations</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Full Searchable & Paginated Course List (All Courses + Free Electives) -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2 class="section-title">
+                <i class="bi bi-search" style="color:#1d6f8a;"></i>
+                Browse &amp; Select Courses (Program &amp; Free Electives)
+            </h2>
+            <span class="text-muted small">
+                Showing <strong>{{ available_courses.start_index|default:0 }}&ndash;{{ available_courses.end_index|default:0 }}</strong>
+                of <strong>{{ total_available }}</strong> courses (8 per page)
+            </span>
+        </div>
+
+        <!-- Search & Filter Form -->
+        <form method="GET" action="{% url 'course_registration' %}" class="filter-bar">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-4">
+                    <label>Search by Code, Title, or Keyword</label>
+                    <input type="text" name="search" class="form-control"
+                        placeholder="e.g., CSC202, Algorithms, Economics, Elective..."
+                        value="{{ request.GET.search }}">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label>School</label>
+                    <select name="school" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Schools</option>
+                        {% for code, label in schools %}
+                        <option value="{{ code }}" {% if request.GET.school == code %}selected{% endif %}>{{ code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label>Department</label>
+                    <select name="department" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Departments</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept }}" {% if request.GET.department == dept %}selected{% endif %}>{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-register w-100 py-2">Search</button>
+                    <a href="{% url 'course_registration' %}" class="btn btn-outline-secondary py-2">Reset</a>
+                </div>
+            </div>
+        </form>
+
+        <!-- Live Credit Selection Notice -->
+        <div id="liveCreditBar" class="alert alert-info py-2 px-3 d-none mb-3" role="alert">
+            Selected on this page: <strong id="selectedCreditsCount">0</strong> credit(s) &middot;
+            Projected total: <strong id="projectedTotalCredits">{{ credits_registered }}</strong> / {{ max_credits }} credits.
+            <span id="overloadWarningText" class="text-danger fw-bold d-none ms-2">
+                Exceeds {{ max_credits }}-credit limit!
+                <a href="#" data-bs-toggle="modal" data-bs-target="#overloadModal" class="alert-link">Request an Overload</a>
+            </span>
+        </div>
+
+        <form method="POST" action="{% url 'course_registration' %}">
+            {% csrf_token %}
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width:45px;"></th>
+                            <th>Course Code</th>
+                            <th>Course Name</th>
+                            <th style="width:85px;">Credits</th>
+                            <th>Department</th>
+                            <th>Category</th>
+                            <th>Prerequisite Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in available_courses %}
+                        <tr>
+                            <td>
+                                <input class="form-check-input page-course-checkbox" type="checkbox"
+                                    name="course_ids" value="{{ item.course.courseID }}"
+                                    data-credits="{{ item.course.credits }}"
+                                    {% if not item.eligible or item.course.courseID in registered_ids %}disabled{% endif %}>
+                            </td>
+                            <td><strong style="color:#14284b;">{{ item.course.courseID }}</strong></td>
+                            <td>{{ item.course.name }}</td>
+                            <td><span class="credit-pill">{{ item.course.credits }} cr</span></td>
+                            <td>{{ item.course.department }}</td>
+                            <td>
+                                {% if item.is_primary_program %}
+                                    <span class="tag-program">{{ item.tag }}</span>
+                                {% elif item.in_program %}
+                                    <span class="tag-school">{{ item.tag }}</span>
+                                {% else %}
+                                    <span class="tag-elective">{{ item.tag }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.eligible %}
+                                    <span class="badge-eligible">&#10003; Eligible</span>
+                                {% else %}
+                                    <span class="badge-missing">Missing: {{ item.missing_prereqs }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="empty-state">No courses matched your search. Try clearing the filters.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
+                <button type="submit" class="btn btn-register">Register Selected Courses</button>
+
+                {% if available_courses.paginator.num_pages > 1 %}
+                <nav aria-label="Course pagination">
+                    <ul class="pagination mb-0">
+                        {% if available_courses.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ available_courses.previous_page_number }}&search={{ request.GET.search }}&school={{ request.GET.school }}&department={{ request.GET.department }}">Previous</a>
+                        </li>
+                        {% endif %}
+                        <li class="page-item active">
+                            <span class="page-link">Page {{ available_courses.number }} of {{ available_courses.paginator.num_pages }}</span>
+                        </li>
+                        {% if available_courses.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ available_courses.next_page_number }}&search={{ request.GET.search }}&school={{ request.GET.school }}&department={{ request.GET.department }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Currently Registered Courses -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2 class="section-title">
+                <i class="bi bi-check2-circle" style="color:#1f6f54;"></i>
+                Currently Registered ({{ current_semester }})
+            </h2>
+            <span class="text-muted small">{{ credits_registered }} / {{ max_credits }} credits registered</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr><th>Course Code</th><th>Course Name</th><th>Credits</th><th>Department</th><th>Registration Date</th></tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in registered_courses %}
+                    <tr>
+                        <td><strong>{{ enrollment.course.courseID }}</strong></td>
+                        <td>{{ enrollment.course.name }}</td>
+                        <td><span class="credit-pill">{{ enrollment.course.credits }} cr</span></td>
+                        <td>{{ enrollment.course.department }}</td>
+                        <td>{{ enrollment.registration_date }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="empty-state">No courses registered yet for {{ current_semester }}.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Credit Overload Request Modal -->
+<div class="modal fade" id="overloadModal" tabindex="-1" aria-labelledby="overloadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'request_credit_overload' %}">
+                {% csrf_token %}
+                <div class="modal-header" style="background-color:#14284b; color:white;">
+                    <h5 class="modal-title" id="overloadModalLabel">Request Credit Overload ({{ current_semester }})</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">
+                        The standard maximum course load is <strong>18 credit hours</strong>. Submit this request to your academic advisor and Registry if you need to register for up to 24 credits.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Requested Total Credit Hours</label>
+                        <select name="requested_credits" class="form-select" required>
+                            <option value="19">19 Credit Hours</option>
+                            <option value="20">20 Credit Hours</option>
+                            <option value="21" selected>21 Credit Hours</option>
+                            <option value="22">22 Credit Hours</option>
+                            <option value="24">24 Credit Hours (Maximum)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Academic Justification</label>
+                        <textarea name="reason" class="form-control" rows="3" required
+                            placeholder="Explain why you need a credit overload (e.g., graduating senior, minor requirement, strong GPA)..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-register">Submit Overload Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function() {
+    const baseCredits = {{ credits_registered }};
+    const maxCredits = {{ max_credits }};
+    const checkboxes = document.querySelectorAll('.page-course-checkbox');
+    const bar = document.getElementById('liveCreditBar');
+    const selEl = document.getElementById('selectedCreditsCount');
+    const projEl = document.getElementById('projectedTotalCredits');
+    const warnEl = document.getElementById('overloadWarningText');
+
+    function updateCredits() {
+        let added = 0;
+        checkboxes.forEach(cb => {
+            if (cb.checked) added += parseInt(cb.dataset.credits || '0', 10);
+        });
+        if (added > 0) {
+            bar.classList.remove('d-none');
+            selEl.textContent = added;
+            const total = baseCredits + added;
+            projEl.textContent = total;
+            if (total > maxCredits) {
+                bar.classList.remove('alert-info');
+                bar.classList.add('alert-warning');
+                warnEl.classList.remove('d-none');
+            } else {
+                bar.classList.remove('alert-warning');
+                bar.classList.add('alert-info');
+                warnEl.classList.add('d-none');
+            }
+        } else {
+            bar.classList.add('d-none');
+        }
+    }
+    checkboxes.forEach(cb => cb.addEventListener('change', updateCredits));
+})();
+</script>
+{% endblock %}

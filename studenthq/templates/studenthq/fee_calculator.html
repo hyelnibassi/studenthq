@@ -1,0 +1,116 @@
+{% extends 'studenthq/base.html' %}
+{% block title %}Fee Calculator - Student HQ | AUN{% endblock %}
+{% block nav_fee %}active{% endblock %}
+{% block extra_css %}
+<style>
+    .page-header { background: linear-gradient(135deg, #1a3a52 0%, #2c5aa0 100%); color: white; padding: 3rem 0; margin-bottom: 3rem; text-align: center; }
+    .page-header h1 { font-weight: 700; margin-bottom: 0.5rem; }
+    .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 8px; }
+    .card-header { background: linear-gradient(135deg, #1a3a52 0%, #2c5aa0 100%); color: white; font-weight: 600; border: none; padding: 1.5rem; }
+    .form-label { font-weight: 600; color: #1a3a52; margin-bottom: 0.5rem; }
+    .form-control, .form-select { border: 1px solid #ddd; border-radius: 6px; padding: 0.75rem 1rem; }
+    .mandatory-fees-section { background-color: #f8f9fa; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+    .mandatory-fees-section h5 { color: #1a3a52; font-weight: 600; margin-bottom: 1rem; }
+    .btn-calculate { background: linear-gradient(135deg, #2c5aa0 0%, #1a3a52 100%); border: none; color: white; font-weight: 600; padding: 0.75rem 2rem; border-radius: 6px; font-size: 1.05rem; width: 100%; }
+    .breakdown-table thead th { color: #1a3a52; font-weight: 600; border: none; padding: 1rem; }
+    .breakdown-table thead { background-color: #f8f9fa; border-top: 2px solid #1a3a52; }
+    .breakdown-table tbody td { padding: 1rem; }
+    .total-row { background-color: #f8f9fa; border-top: 2px solid #1a3a52 !important; font-weight: 700; color: #1a3a52; font-size: 1.1rem; }
+    .amount { color: #2c5aa0; font-weight: 600; }
+    .penalty-row { background-color: #ffe6e6; }
+    .penalty-row td { color: #dc3545; }
+    .policy-note { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 4px; margin-top: 1.5rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Semester Fee Calculator</h1>
+        <p style="font-size:1.1rem; opacity:0.9;">Calculate your semester fees based on your enrollment and accommodation</p>
+    </div>
+</div>
+<main class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 mb-4">
+            <div class="card">
+                <div class="card-header">Fee Calculator</div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{% url 'fee_calculator' %}">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="creditHours" class="form-label">Number of Credit Hours Enrolled</label>
+                            <input type="number" class="form-control" id="creditHours" name="credit_hours" min="1" max="24" value="{{ form_data.credit_hours|default:15 }}" required>
+                            <small class="form-text text-muted">Minimum 1, Maximum 24 credit hours per semester</small>
+                        </div>
+                        <div class="mb-4">
+                            <label for="accommodation" class="form-label">Accommodation Type</label>
+                            <select class="form-select" id="accommodation" name="accommodation" required>
+                                <option value="">-- Select accommodation type --</option>
+                                <option value="on-campus" {% if form_data.accommodation == 'on-campus' %}selected{% endif %}>On-Campus (₦250,000)</option>
+                                <option value="off-campus" {% if form_data.accommodation == 'off-campus' %}selected{% endif %}>Off-Campus (₦180,000)</option>
+                                <option value="none" {% if form_data.accommodation == 'none' %}selected{% endif %}>None</option>
+                            </select>
+                        </div>
+                        <div class="mandatory-fees-section">
+                            <h5>Mandatory Fees</h5>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="sportsFee" name="fees" value="sports" {% if 'sports' in form_data.fees %}checked{% endif %}>
+                                <label class="form-check-label" for="sportsFee">Sports Fee — ₦15,000</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="labFee" name="fees" value="lab" {% if 'lab' in form_data.fees %}checked{% endif %}>
+                                <label class="form-check-label" for="labFee">Lab Fee — ₦25,000</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="libraryFee" name="fees" value="library" {% if 'library' in form_data.fees %}checked{% endif %}>
+                                <label class="form-check-label" for="libraryFee">Library Fee — ₦20,000</label>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="monthsOverdue" class="form-label">Months Overdue</label>
+                            <input type="number" class="form-control" id="monthsOverdue" name="months_overdue" min="0" value="{{ form_data.months_overdue|default:0 }}" required>
+                            <small class="form-text text-muted">Enter 0 if payment is not yet late</small>
+                        </div>
+                        <button type="submit" class="btn btn-calculate btn-lg">Calculate Fees</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if result %}
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header">Fees Breakdown</div>
+                <div class="card-body p-0">
+                    <table class="table breakdown-table mb-0">
+                        <thead>
+                            <tr><th>Description</th><th class="text-end">Amount</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Tuition Fee ({{ result.credit_hours }} credits × ₦50,000)</td><td class="amount text-end">₦{{ result.tuition|floatformat:0 }}</td></tr>
+                            <tr><td>Accommodation Fee ({{ result.accommodation_type }})</td><td class="amount text-end">₦{{ result.accommodation_fee|floatformat:0 }}</td></tr>
+                            {% if result.sports_fee %}<tr><td>Sports Fee</td><td class="amount text-end">₦15,000</td></tr>{% endif %}
+                            {% if result.lab_fee %}<tr><td>Lab Fee</td><td class="amount text-end">₦25,000</td></tr>{% endif %}
+                            {% if result.library_fee %}<tr><td>Library Fee</td><td class="amount text-end">₦20,000</td></tr>{% endif %}
+                            {% if result.penalty > 0 %}
+                            <tr class="penalty-row">
+                                <td>Late Payment Penalty (₦30,000 × {{ result.months_overdue }} months)</td>
+                                <td class="amount text-end">₦{{ result.penalty|floatformat:0 }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr class="total-row">
+                                <td><strong>Total Amount Due</strong></td>
+                                <td class="amount text-end"><strong>₦{{ result.total|floatformat:0 }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="policy-note m-3">
+                        <p><strong>⚠️ Late Payment Policy:</strong> <span style="color:#dc3545; font-weight:700;">Late payment penalty is ₦30,000 per month overdue as per AUN policy.</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

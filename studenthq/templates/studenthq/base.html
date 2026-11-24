@@ -1,0 +1,179 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student HQ | AUN{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --campus-navy: #14284b;
+            --campus-navy-light: #1e3a68;
+            --campus-gold: #d99b26;
+            --campus-brick: #c2543d;
+            --campus-forest: #1f6f54;
+            --campus-teal: #1d6f8a;
+            --paper-bg: #f6f4ef;
+            --card-border: #e5e1d8;
+            --ink-dark: #1c2430;
+            --ink-muted: #5c6675;
+        }
+        body {
+            background-color: var(--paper-bg);
+            color: var(--ink-dark);
+            font-family: 'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            background-color: var(--campus-navy) !important;
+            border-bottom: 4px solid var(--campus-gold);
+            padding: 0.7rem 1.25rem;
+            box-shadow: 0 2px 8px rgba(20, 40, 75, 0.14);
+        }
+        .navbar-brand {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-weight: 700;
+            font-size: 1.45rem;
+            color: #fff !important;
+            letter-spacing: 0.2px;
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.88) !important;
+            font-weight: 500;
+            font-size: 0.94rem;
+            margin: 0 0.2rem;
+            padding: 0.45rem 0.75rem !important;
+            border-radius: 6px;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+        .nav-link:hover { color: #fff !important; background-color: rgba(255,255,255,0.1); }
+        .nav-link.active { color: #fff !important; background-color: rgba(217, 155, 38, 0.22); border-bottom: 2px solid var(--campus-gold); border-radius: 6px 6px 0 0; }
+        .dropdown-menu { border: 1px solid var(--card-border); border-radius: 8px; box-shadow: 0 8px 20px rgba(20, 40, 75, 0.12); padding: 0.4rem; }
+        .dropdown-item { border-radius: 5px; padding: 0.48rem 0.85rem; font-weight: 500; font-size: 0.92rem; }
+        .dropdown-item:hover { background-color: #f4f1ea; color: var(--campus-navy); }
+        footer {
+            background-color: var(--campus-navy);
+            color: rgba(255,255,255,0.85);
+            padding: 1.5rem 0;
+            margin-top: auto;
+            text-align: center;
+            font-size: 0.88rem;
+            border-top: 3px solid var(--campus-gold);
+        }
+        footer a { color: #f3c969 !important; text-decoration: none; font-weight: 600; }
+        footer a:hover { text-decoration: underline; }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% if user and user.role == 'student' %}{% url 'dashboard' %}{% elif user and user.role == 'admin' %}{% url 'admin_fee_structure' %}{% elif user and user.role == 'advisor' %}{% url 'advisor_student_progress' %}{% else %}{% url 'login' %}{% endif %}">Student HQ</a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-1">
+                {% if user and user.role %}
+                    {% if user.role == 'student' %}
+                        <li class="nav-item">
+                            <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="{% url 'dashboard' %}">Dashboard</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Fees</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'fee_calculator' %}">💰 Fee Calculator</a></li>
+                                <li><a class="dropdown-item" href="{% url 'payment_history' %}">📋 Payment History</a></li>
+                                <li><a class="dropdown-item" href="{% url 'installment_plan' %}">📆 Installment Plan</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'payment_simulator' %}">🔢 Penalty Simulator</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Courses</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'course_catalog' %}">📚 Course Catalog</a></li>
+                                <li><a class="dropdown-item" href="{% url 'course_registration' %}">✏️ Course Registration</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Academic</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'academic_progress' %}">📊 Academic Progress</a></li>
+                                <li><a class="dropdown-item" href="{% url 'gpa_simulator' %}">🔮 GPA Simulator</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
+                                <span style="width:28px;height:28px;background:#6366f1;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:white;">{{ user.name|first|upper }}</span>
+                                {{ user.name|truncatechars:12 }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'profile' %}">👤 My Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}" style="color:#f87171;">🚪 Logout</a></li>
+                            </ul>
+                        </li>
+                    {% elif user.role == 'admin' %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'admin_fee_structure' %}">Fee Structure</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'admin_payment_verification' %}">Payments</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'admin_course_catalog' %}">Courses</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'admin_financial_report' %}">Reports</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'audit_log' %}">Audit Log</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
+                                <span style="width:28px;height:28px;background:#10b981;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:white;">{{ user.name|first|upper }}</span>
+                                {{ user.name|truncatechars:12 }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'logout' %}" style="color:#f87171;">🚪 Logout</a></li>
+                            </ul>
+                        </li>
+                    {% elif user.role == 'advisor' %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'advisor_student_progress' %}">Student Progress</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
+                                <span style="width:28px;height:28px;background:#f59e0b;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:white;">{{ user.name|first|upper }}</span>
+                                {{ user.name|truncatechars:12 }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'logout' %}" style="color:#f87171;">🚪 Logout</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    {% if messages %}
+        <div class="container-fluid px-4 mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <footer>
+        <p>&copy; 2026 American University of Nigeria (AUN) — Student HQ. All rights reserved.</p>
+        <p>For support: <a href="mailto:studenthq@aun.edu.ng" style="color:#3b82f6;">studenthq@aun.edu.ng</a></p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

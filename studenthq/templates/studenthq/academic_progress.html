@@ -1,0 +1,128 @@
+{% extends 'studenthq/base.html' %}
+{% block title %}Academic Progress - Student HQ | AUN{% endblock %}
+{% block nav_progress %}active{% endblock %}
+{% block extra_css %}
+<style>
+    .page-header { padding: 2rem 0; border-bottom: 1px solid #e2e8f0; background-color: white; margin-bottom: 2rem; }
+    .page-title { font-size: 2.5rem; font-weight: 700; color: #1a3a52; margin-bottom: 0.5rem; }
+    .graduation-section { background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 2rem; border-left: 5px solid #3b82f6; }
+    .progress { height: 2.5rem; background-color: #e2e8f0; border-radius: 0.5rem; }
+    .progress-bar { background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); font-weight: 600; font-size: 1rem; line-height: 2.5rem; }
+    .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .stat-card { background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid #3b82f6; }
+    .stat-label { font-size: 0.95rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+    .stat-value { font-size: 2.5rem; font-weight: 700; color: #3b82f6; }
+    .section-card { background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+    .section-title { font-size: 1.25rem; font-weight: 600; color: #1a3a52; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .section-title::before { content: ''; width: 4px; height: 1.5rem; background-color: #3b82f6; border-radius: 2px; }
+    .progress-sm { height: 1.5rem; background-color: #e2e8f0; border-radius: 0.375rem; }
+    .credit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .credit-name { font-weight: 600; color: #1a3a52; }
+    .credit-count { font-size: 0.95rem; color: #64748b; font-weight: 500; }
+    .transcript-table thead { background-color: #1a3a52; }
+    .transcript-table thead th { color: white; font-weight: 600; border: none; padding: 1.25rem; text-transform: uppercase; font-size: 0.85rem; }
+    .transcript-table tbody tr:hover { background-color: #f1f5f9; }
+    .transcript-table tbody td { padding: 1.25rem; vertical-align: middle; color: #334155; }
+    .semester-badge { background-color: #e0f2fe; color: #0369a1; padding: 0.4rem 0.8rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.85rem; }
+    .course-code { font-family: 'Courier New', monospace; font-weight: 600; color: #1a3a52; }
+    .grade-badge { padding: 0.4rem 0.8rem; border-radius: 0.375rem; font-weight: 700; font-size: 0.85rem; text-align: center; display: inline-block; min-width: 40px; }
+    .grade-a { background-color: #dcfce7; color: #166534; }
+    .grade-b { background-color: #fef3c7; color: #92400e; }
+    .grade-c { background-color: #fee2e2; color: #991b1b; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container-fluid px-4">
+        <h1 class="page-title">Academic Progress</h1>
+        <p style="font-size:1rem; color:#64748b;">American University of Nigeria (AUN) — Student HQ Portal</p>
+    </div>
+</div>
+<div class="container-fluid px-4">
+    <div class="graduation-section">
+        <div style="font-size:1.1rem; font-weight:600; color:#1a3a52; margin-bottom:1rem;">Graduation Requirements</div>
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: {{ graduation_percentage }}%;" aria-valuenow="{{ credits_completed }}" aria-valuemin="0" aria-valuemax="120">
+                {{ credits_completed }} of 120 credits — {{ graduation_percentage }}% complete
+            </div>
+        </div>
+    </div>
+    <div class="stats-container">
+        <div class="stat-card">
+    <div class="stat-label">Current Semester GPA</div>
+    <div class="stat-value">
+        {% if current_gpa > 0 %}{{ current_gpa|floatformat:2 }}{% else %}<span style="font-size:1rem;color:#999;font-weight:500;">Not yet earned</span>{% endif %}
+    </div>
+</div>
+    <div class="stat-card">
+    <div class="stat-label">Cumulative GPA</div>
+    <div class="stat-value">
+        {% if credits_completed > 0 %}
+            {{ student.cumulativeGPA|floatformat:2 }}
+        {% else %}
+            <span style="font-size:1rem;color:#999;font-weight:500;">Not yet earned</span>
+        {% endif %}
+    </div>
+</div>
+
+    </div>
+    <div class="section-card">
+        <h2 class="section-title">Credits Breakdown</h2>
+        <div class="credit-item mb-4">
+            <div class="credit-header">
+                <span class="credit-name">Core Requirements</span>
+                <span class="credit-count">{{ core_completed }} of {{ core_required }} completed</span>
+            </div>
+            <div class="progress progress-sm">
+                <div class="progress-bar" style="background-color:#3b82f6; width:{% widthratio core_completed core_required 100 %}%"></div>
+            </div>
+        </div>
+        <div class="credit-item mb-4">
+            <div class="credit-header">
+                <span class="credit-name">Electives</span>
+                <span class="credit-count">{{ electives_completed }} of {{ electives_required }} completed</span>
+            </div>
+            <div class="progress progress-sm">
+                <div class="progress-bar" style="background-color:#8b5cf6; width:{% widthratio electives_completed electives_required 100 %}%"></div>
+            </div>
+        </div>
+        <div class="credit-item">
+            <div class="credit-header">
+                <span class="credit-name">General Education</span>
+                <span class="credit-count">{{ gen_ed_completed }} of {{ gen_ed_required }} completed</span>
+            </div>
+            <div class="progress progress-sm">
+                <div class="progress-bar" style="background-color:#06b6d4; width:{% widthratio gen_ed_completed gen_ed_required 100 %}%"></div>
+            </div>
+        </div>
+    </div>
+    <div class="section-card">
+        <h2 class="section-title">Academic Transcript</h2>
+        <div class="table-responsive">
+            <table class="table transcript-table">
+                <thead>
+                    <tr><th>Semester</th><th>Course Code</th><th>Course Name</th><th>Credits</th><th>Grade</th><th>Grade Points</th></tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in transcript %}
+                    <tr>
+                        <td><span class="semester-badge">{{ enrollment.semester }}</span></td>
+                        <td><span class="course-code">{{ enrollment.course.courseID }}</span></td>
+                        <td>{{ enrollment.course.name }}</td>
+                        <td style="text-align:center; font-weight:600;">{{ enrollment.course.credits }}</td>
+                        <td>
+                            <span class="grade-badge {% if enrollment.grade == 'A' %}grade-a{% elif enrollment.grade in 'BC' %}grade-b{% else %}grade-c{% endif %}">
+                                {{ enrollment.grade }}
+                            </span>
+                        </td>
+                        <td style="font-weight:600; color:#3b82f6;">{{ enrollment.grade_points|floatformat:1 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted py-4">No transcript records yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

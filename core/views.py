@@ -216,11 +216,18 @@ def dashboard(request):
         'next_due_date': upcoming[0]['due_date'] if upcoming else None,
         'live_gpa': live_gpa,
     })
+def get_fee_structure():
+    try:
+        return FeeStructure.objects.filter(pk=1).first() or FeeStructure()
+    except Exception:
+        return FeeStructure()
+
+
 @role_required('student')
 def fee_calculator(request):
     user      = get_logged_in_user(request)
     result    = None
-    fs        = FeeStructure.objects.filter(pk=1).first() or FeeStructure()
+    fs        = get_fee_structure()
     engine    = FeeCalculationEngine(fs)
     form_data = {
         'credit_hours': 15,
@@ -385,7 +392,7 @@ def course_catalog(request):
     paginator = Paginator(qs, 20)
     page_obj  = paginator.get_page(request.GET.get('page'))
     # provide fee structure for dynamic fee display
-    fs = FeeStructure.objects.filter(pk=1).first() or FeeStructure()
+    fs = get_fee_structure()
     # annotate page courses with computed fee totals
     for course in page_obj.object_list:
         try:
